@@ -8,7 +8,8 @@ test:
         -v \
         --count=1 \
         -coverprofile cover.out \
-		./http
+		./http \
+		./release
 	go tool cover -func cover.out
 
 .PHONY: code-lint
