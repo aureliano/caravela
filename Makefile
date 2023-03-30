@@ -10,7 +10,8 @@ test:
         -coverprofile cover.out \
 		./http \
 		./release \
-		./file
+		./file \
+		./provider
 	go tool cover -func cover.out
 
 .PHONY: code-lint
