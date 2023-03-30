@@ -11,3 +11,11 @@ type Release struct {
 		URL  string
 	}
 }
+
+type Comparator interface {
+	CompareTo(r2 *Release) int
+}
+
+func (r1 *Release) CompareTo(r2 *Release) int {
+	return CompareVersions(r1.Name, r2.Name)
+}
