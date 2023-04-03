@@ -149,8 +149,31 @@ func TestCheckForUpdatesNoCacheCurrentVersionOnTheEdge(t *testing.T) {
 	p.AssertCalled(t, "RestoreCacheRelease")
 }
 
-/*
-func TestCheckForUpdatesNoCache(t *testing.T) {
+func TestUpdateCheckVersionFail(t *testing.T) {
+	m := new(mockHttpClient)
+	m.On("Do", mock.Anything).Return(
+		&http.Response{
+			StatusCode: 200,
+			Body:       io.NopCloser(bytes.NewReader([]byte(``))),
+		}, nil)
+	p := new(mockProvider)
+	p.On("FetchLastRelease", m).Return(
+		nil, fmt.Errorf("any error"),
+	)
+	p.On("CacheRelease", release.Release{}).Return(nil)
+	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("any error"))
+
+	err := Update(m, p, "14-bis", "0.0.1")
+	actual := err.Error()
+	expected := "any error"
+
+	p.AssertNotCalled(t, "FetchLastRelease")
+	p.AssertNotCalled(t, "CacheRelease")
+	p.AssertCalled(t, "RestoreCacheRelease")
+	assert.Equal(t, expected, actual)
+}
+
+func TestUpdateAlreadyUpToDate(t *testing.T) {
 	m := new(mockHttpClient)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
@@ -158,9 +181,6 @@ func TestCheckForUpdatesNoCache(t *testing.T) {
 			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
 		}, nil)
 	p := new(mockProvider)
-	p.On("FetchReleases", m).Return(
-		[]*release.Release{}, nil,
-	)
 	p.On("FetchLastRelease", m).Return(
 		&release.Release{
 			Name: "v0.1.2",
@@ -169,49 +189,17 @@ func TestCheckForUpdatesNoCache(t *testing.T) {
 	p.On("CacheRelease", release.Release{Name: "v0.1.2"}).Return(nil)
 	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("no file error"))
 
-	type testCase struct {
-		name     string
-		input    string
-		expected *release.Release
-	}
-	testCases := []testCase{
-		{
-			name:     "current version is the newest",
-			input:    "v0.1.2",
-			expected: nil,
-		}, {
-			name:     "current version is NOT the newest",
-			input:    "v0.1.1",
-			expected: &release.Release{Name: "v0.1.2"},
-		},
-	}
+	err := Update(m, p, "14-bis", "0.1.2")
+	actual := err.Error()
+	expected := "already on the edge"
 
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			actual, _ := CheckForUpdates(m, p, tc.input)
-			p.AssertCalled(t, "FetchLastRelease", m)
-			p.AssertCalled(t, "CacheRelease", release.Release{Name: "v0.1.2"})
-			p.AssertCalled(t, "RestoreCacheRelease")
-
-			if (actual == nil && tc.expected != nil) || (actual != nil && tc.expected == nil) ||
-				(actual != nil && tc.expected != nil && actual.Name != tc.expected.Name) {
-				assert.Fail(t, "expected %v, but got %v", tc.expected, actual)
-			}
-		})
-	}
-
-	rel, err := CheckForUpdates(m, p, "v0.1.1")
-	p.AssertCalled(t, "FetchLastRelease", m)
-	p.AssertCalled(t, "CacheRelease", release.Release{Name: "v0.1.2"})
+	p.AssertNotCalled(t, "FetchLastRelease")
+	p.AssertNotCalled(t, "CacheRelease")
 	p.AssertCalled(t, "RestoreCacheRelease")
-	assert.Nil(t, err, err)
-
-	actual := rel.Name
-	expected := "v0.1.2"
 	assert.Equal(t, expected, actual)
 }
 
-func TestCheckForUpdatesWithCache(t *testing.T) {
+func TestUpdateDownloadFail(t *testing.T) {
 	m := new(mockHttpClient)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
@@ -219,56 +207,134 @@ func TestCheckForUpdatesWithCache(t *testing.T) {
 			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
 		}, nil)
 	p := new(mockProvider)
-	p.On("FetchReleases", m).Return(
-		[]*release.Release{}, nil,
-	)
 	p.On("FetchLastRelease", m).Return(
 		&release.Release{
 			Name: "v0.1.2",
 		}, nil,
 	)
-	p.On("CacheRelease", release.Release{}).Return(nil)
-	p.On("RestoreCacheRelease").Return(&release.Release{Name: "v0.1.2"}, nil)
-
-	type testCase struct {
-		name     string
-		input    string
-		expected *release.Release
-	}
-	testCases := []testCase{
-		{
-			name:     "current version is the newest",
-			input:    "v0.1.2",
-			expected: nil,
-		}, {
-			name:     "current version is NOT the newest",
-			input:    "v0.1.1",
-			expected: &release.Release{Name: "v0.1.2"},
-		},
+	p.On("CacheRelease", release.Release{Name: "v0.1.2"}).Return(nil)
+	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("no file error"))
+	downloadRelease = func(hcp httpc.HttpClientPlugin, r *release.Release, s string) (string, string, error) {
+		return "", "", fmt.Errorf("download release error")
 	}
 
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			actual, _ := CheckForUpdates(m, p, tc.input)
-			p.AssertNotCalled(t, "FetchLastRelease")
-			p.AssertNotCalled(t, "CacheRelease")
-			p.AssertCalled(t, "RestoreCacheRelease")
+	err := Update(m, p, "14-bis", "0.1.1")
 
-			if (actual == nil && tc.expected != nil) || (actual != nil && tc.expected == nil) ||
-				(actual != nil && tc.expected != nil && actual.Name != tc.expected.Name) {
-				assert.Fail(t, "expected %v, but got %v", tc.expected, actual)
-			}
-		})
-	}
-
-	rel, err := CheckForUpdates(m, p, "v0.1.1")
 	p.AssertNotCalled(t, "FetchLastRelease")
 	p.AssertNotCalled(t, "CacheRelease")
 	p.AssertCalled(t, "RestoreCacheRelease")
-	assert.Nil(t, err, err)
-
-	actual := rel.Name
-	expected := "v0.1.2"
-	assert.Equal(t, expected, actual)
+	assert.Equal(t, "download release error", err.Error())
 }
-*/
+
+func TestUpdateDecompressionFail(t *testing.T) {
+	m := new(mockHttpClient)
+	m.On("Do", mock.Anything).Return(
+		&http.Response{
+			StatusCode: 200,
+			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
+		}, nil)
+	p := new(mockProvider)
+	p.On("FetchLastRelease", m).Return(
+		&release.Release{
+			Name: "v0.1.2",
+		}, nil,
+	)
+	p.On("CacheRelease", release.Release{Name: "v0.1.2"}).Return(nil)
+	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("no file error"))
+	downloadRelease = func(hcp httpc.HttpClientPlugin, r *release.Release, s string) (string, string, error) {
+		return "", "", nil
+	}
+	decompress = func(src string) (int, error) { return 0, fmt.Errorf("decompression error") }
+	err := Update(m, p, "14-bis", "0.1.1")
+
+	p.AssertNotCalled(t, "FetchLastRelease")
+	p.AssertNotCalled(t, "CacheRelease")
+	p.AssertCalled(t, "RestoreCacheRelease")
+	assert.Equal(t, "decompression error", err.Error())
+}
+
+func TestUpdateChecksumFail(t *testing.T) {
+	m := new(mockHttpClient)
+	m.On("Do", mock.Anything).Return(
+		&http.Response{
+			StatusCode: 200,
+			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
+		}, nil)
+	p := new(mockProvider)
+	p.On("FetchLastRelease", m).Return(
+		&release.Release{
+			Name: "v0.1.2",
+		}, nil,
+	)
+	p.On("CacheRelease", release.Release{Name: "v0.1.2"}).Return(nil)
+	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("no file error"))
+	downloadRelease = func(hcp httpc.HttpClientPlugin, r *release.Release, s string) (string, string, error) {
+		return "", "", nil
+	}
+	decompress = func(src string) (int, error) { return 1, nil }
+	checksumRelease = func(binPath, checksumsPath string) error { return fmt.Errorf("checksum error") }
+	err := Update(m, p, "14-bis", "0.1.1")
+
+	p.AssertNotCalled(t, "FetchLastRelease")
+	p.AssertNotCalled(t, "CacheRelease")
+	p.AssertCalled(t, "RestoreCacheRelease")
+	assert.Equal(t, "checksum error", err.Error())
+}
+
+func TestUpdateInstallationFail(t *testing.T) {
+	m := new(mockHttpClient)
+	m.On("Do", mock.Anything).Return(
+		&http.Response{
+			StatusCode: 200,
+			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
+		}, nil)
+	p := new(mockProvider)
+	p.On("FetchLastRelease", m).Return(
+		&release.Release{
+			Name: "v0.1.2",
+		}, nil,
+	)
+	p.On("CacheRelease", release.Release{Name: "v0.1.2"}).Return(nil)
+	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("no file error"))
+	downloadRelease = func(hcp httpc.HttpClientPlugin, r *release.Release, s string) (string, string, error) {
+		return "", "", nil
+	}
+	decompress = func(src string) (int, error) { return 1, nil }
+	checksumRelease = func(binPath, checksumsPath string) error { return nil }
+	installRelease = func(srcDir string) error { return fmt.Errorf("installation error") }
+	err := Update(m, p, "14-bis", "0.1.1")
+
+	p.AssertNotCalled(t, "FetchLastRelease")
+	p.AssertNotCalled(t, "CacheRelease")
+	p.AssertCalled(t, "RestoreCacheRelease")
+	assert.Equal(t, "installation error", err.Error())
+}
+
+func TestUpdate(t *testing.T) {
+	m := new(mockHttpClient)
+	m.On("Do", mock.Anything).Return(
+		&http.Response{
+			StatusCode: 200,
+			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
+		}, nil)
+	p := new(mockProvider)
+	p.On("FetchLastRelease", m).Return(
+		&release.Release{
+			Name: "v0.1.2",
+		}, nil,
+	)
+	p.On("CacheRelease", release.Release{Name: "v0.1.2"}).Return(nil)
+	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("no file error"))
+	downloadRelease = func(hcp httpc.HttpClientPlugin, r *release.Release, s string) (string, string, error) {
+		return "", "", nil
+	}
+	decompress = func(src string) (int, error) { return 1, nil }
+	checksumRelease = func(binPath, checksumsPath string) error { return nil }
+	installRelease = func(srcDir string) error { return nil }
+	err := Update(m, p, "14-bis", "0.1.1")
+
+	p.AssertNotCalled(t, "FetchLastRelease")
+	p.AssertNotCalled(t, "CacheRelease")
+	p.AssertCalled(t, "RestoreCacheRelease")
+	assert.Nil(t, err)
+}
