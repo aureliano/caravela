@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	httpc "github.com/aureliano/caravela/http"
+	"github.com/aureliano/caravela/i18n"
 )
 
 func DownloadTo(client httpc.HttpClientPlugin, release *Release, dir string) (string, string, error) {
@@ -20,7 +21,7 @@ func DownloadTo(client httpc.HttpClientPlugin, release *Release, dir string) (st
 
 	fileBin := filepath.Join(dir, fname)
 
-	fmt.Println("Baixando pacote de atualização.")
+	i18n.Wmsg(100)
 	err := downloadFile(client, furl, fileBin)
 	if err != nil {
 		return "", "", err
@@ -33,7 +34,7 @@ func DownloadTo(client httpc.HttpClientPlugin, release *Release, dir string) (st
 		return "", "", fmt.Errorf("não encontrou o arquivo %s", fname)
 	}
 
-	fmt.Println("Baixando checksum.")
+	i18n.Wmsg(101)
 	err = downloadFile(client, furl, fileChecksums)
 	if err != nil {
 		return "", "", err

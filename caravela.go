@@ -7,6 +7,7 @@ import (
 
 	"github.com/aureliano/caravela/file"
 	"github.com/aureliano/caravela/http"
+	"github.com/aureliano/caravela/i18n"
 	"github.com/aureliano/caravela/provider"
 	"github.com/aureliano/caravela/release"
 )
@@ -36,7 +37,7 @@ func CheckForUpdates(client http.HttpClientPlugin, provider provider.UpdaterProv
 }
 
 func Update(client http.HttpClientPlugin, provider provider.UpdaterProvider, pname, currver string) error {
-	fmt.Println("Verificando a existência de versão mais recente.")
+	i18n.Wmsg(200)
 	rel, err := CheckForUpdates(client, provider, currver)
 	if err != nil {
 		return err
@@ -46,24 +47,24 @@ func Update(client http.HttpClientPlugin, provider provider.UpdaterProvider, pna
 		return fmt.Errorf("already on the edge")
 	}
 
-	fmt.Printf("Encontrada a versão %s\n", rel.Name)
+	i18n.Wmsg(201, rel.Name)
 	fmt.Println(rel.Description)
 
 	dir := filepath.Join(os.TempDir(), pname)
 	os.MkdirAll(dir, os.ModePerm)
-	fmt.Printf("Define %s como diretório de instalação.\n", dir)
+	i18n.Wmsg(202, dir)
 
 	bin, checksums, err := downloadRelease(client, rel, dir)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("A descomprimir arquivos.")
+	i18n.Wmsg(203)
 	num, err := decompress(bin)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%d arquivos descomprimidos de %s.\n", num, filepath.Base(bin))
+	i18n.Wmsg(204, num, filepath.Base(bin))
 
 	err = checksumRelease(bin, checksums)
 	if err != nil {
@@ -75,7 +76,7 @@ func Update(client http.HttpClientPlugin, provider provider.UpdaterProvider, pna
 		return err
 	}
 
-	fmt.Println("Apagando arquivos de instalação.")
+	i18n.Wmsg(205)
 	os.RemoveAll(dir)
 
 	return nil

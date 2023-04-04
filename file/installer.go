@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/aureliano/caravela/i18n"
 )
 
 var osExecutable = os.Executable
@@ -30,7 +32,7 @@ func Install(srcDir string) error {
 		src := filepath.Join(srcDir, file.Name())
 		dest := filepath.Join(dir, file.Name())
 
-		fmt.Printf("Copy %s to %s\n", src, dest)
+		i18n.Wmsg(300, src, dest)
 		err = installFile(dest, src)
 		if err != nil {
 			return nil
