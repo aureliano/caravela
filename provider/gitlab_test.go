@@ -106,7 +106,7 @@ func TestRestoreCacheRelease(t *testing.T) {
 
 	file, err := os.Create(path)
 	assert.Nil(t, err, err)
-	io.WriteString(file, "{\"Name\":\"v0.1.0-dev\",\"Description\":\"Development version.\",\"ReleasedAt\":\"2023-03-06T09:59:26Z\",\"Assets\":[{\"Name\":\"f1\",\"URL\":\"u1\"},{\"Name\":\"f2\",\"URL\":\"u2\"},{\"Name\":\"f3\",\"URL\":\"u3\"}]}")
+	_, _ = io.WriteString(file, "{\"Name\":\"v0.1.0-dev\",\"Description\":\"Development version.\",\"ReleasedAt\":\"2023-03-06T09:59:26Z\",\"Assets\":[{\"Name\":\"f1\",\"URL\":\"u1\"},{\"Name\":\"f2\",\"URL\":\"u2\"},{\"Name\":\"f3\",\"URL\":\"u3\"}]}")
 	file.Close()
 
 	actual, err := provider.RestoreCacheRelease()

@@ -62,7 +62,10 @@ func downloadFile(client httpc.HttpClientPlugin, sourceUrl, dest string) error {
 		return fmt.Errorf("erro na integração com o Gitlab: %d", resp.StatusCode)
 	}
 
-	io.Copy(file, resp.Body)
+	_, err = io.Copy(file, resp.Body)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

@@ -63,7 +63,7 @@ func TestGetChecksumDoesntMatch(t *testing.T) {
 	file, err := os.Create(filepath.Join(os.TempDir(), "checksums.txt"))
 	assert.Nil(t, err, err)
 
-	file.WriteString("12345 14-bis_Windows_x86_64.zip")
+	_, _ = file.WriteString("12345 14-bis_Windows_x86_64.zip")
 	file.Close()
 
 	actual, err := getChecksum("14-bis_Linux_x86_64.zip", file.Name())
@@ -76,7 +76,7 @@ func TestGetChecksum(t *testing.T) {
 	file, err := os.Create(filepath.Join(os.TempDir(), "checksums.txt"))
 	assert.Nil(t, err, err)
 
-	file.WriteString("12345 14-bis_Linux_x86_64.zip")
+	_, _ = file.WriteString("12345 14-bis_Linux_x86_64.zip")
 	file.Close()
 
 	actual, err := getChecksum("14-bis_Linux_x86_64.zip", file.Name())

@@ -24,7 +24,7 @@ func TestInstall(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	file.WriteString("binary")
+	_, _ = file.WriteString("binary")
 	file.Close()
 
 	file, err = os.Create(readme)
@@ -32,7 +32,7 @@ func TestInstall(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	file.WriteString("read-me")
+	_, _ = file.WriteString("read-me")
 	file.Close()
 
 	file, err = os.Create(filepath.Join(idir, "14-bis_Linux_x86_64.tar.gz"))
@@ -143,7 +143,7 @@ func TestInstallFileNew(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	file.WriteString("12345")
+	_, _ = file.WriteString("12345")
 	file.Close()
 
 	dest := filepath.Join(os.TempDir(), "install-new.txt")
@@ -177,7 +177,7 @@ func TestInstallFileReplace(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	file.WriteString("54321")
+	_, _ = file.WriteString("54321")
 	file.Close()
 	source := file.Name()
 
@@ -187,7 +187,7 @@ func TestInstallFileReplace(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	file.WriteString("12345")
+	_, _ = file.WriteString("12345")
 	file.Close()
 
 	err = installFile(dest, source)
