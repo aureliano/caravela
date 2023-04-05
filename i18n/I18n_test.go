@@ -28,7 +28,7 @@ func TestWmsg(t *testing.T) {
 	assert.Nil(t, err)
 	n := Wmsg(100)
 
-	assert.Equal(t, 29, n)
+	assert.Equal(t, 28, n)
 }
 
 func TestPrepareI18nInvalidLocale(t *testing.T) {
@@ -42,14 +42,14 @@ func TestPrepareI18n(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, conf, config)
-	assert.Equal(t, "Baixando pacote de atualização.\n", msg[100])
+	assert.Equal(t, "Baixando pacote de atualização.", msg[100])
 
 	conf = I18nConf{false, EN}
 	err = PrepareI18n(conf)
 
 	assert.Nil(t, err)
 	assert.Equal(t, conf, config)
-	assert.Equal(t, "Downloading update package.\n", msg[100])
+	assert.Equal(t, "Downloading update package.", msg[100])
 
 }
 

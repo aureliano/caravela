@@ -17,7 +17,13 @@ var decompress func(src string) (int, error) = file.Decompress
 var checksumRelease func(binPath string, checksumsPath string) error = file.Checksum
 var installRelease func(srcDir string) error = file.Install
 
-func CheckForUpdates(client http.HttpClientPlugin, provider provider.UpdaterProvider, currver string) (*release.Release, error) {
+func CheckForUpdates(client http.HttpClientPlugin, provider provider.UpdaterProvider, conf i18n.I18nConf, currver string) (*release.Release, error) {
+	err := i18n.PrepareI18n(conf)
+	if err != nil {
+		_ = i18n.PrepareI18n(i18n.I18nConf{Verbose: true, Locale: i18n.EN})
+		fmt.Println("Use default locale.")
+	}
+
 	rel, err := provider.RestoreCacheRelease()
 
 	if err != nil {
@@ -36,12 +42,13 @@ func CheckForUpdates(client http.HttpClientPlugin, provider provider.UpdaterProv
 	}
 }
 
-func Update(client http.HttpClientPlugin, provider provider.UpdaterProvider, pname, currver string) error {
-	i18n.Wmsg(200)
-	rel, err := CheckForUpdates(client, provider, currver)
+func Update(client http.HttpClientPlugin, provider provider.UpdaterProvider, conf i18n.I18nConf, pname, currver string) error {
+	rel, err := CheckForUpdates(client, provider, conf, currver)
 	if err != nil {
 		return err
 	}
+
+	i18n.Wmsg(200)
 
 	if rel == nil {
 		return fmt.Errorf("already on the edge")

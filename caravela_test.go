@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	httpc "github.com/aureliano/caravela/http"
+	"github.com/aureliano/caravela/i18n"
 	"github.com/aureliano/caravela/release"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -62,7 +63,7 @@ func TestCheckForUpdatesRestoreCacheCurrentVersionIsOlder(t *testing.T) {
 	p := new(mockProvider)
 	p.On("RestoreCacheRelease").Return(&release.Release{Name: "v0.1.0"}, nil)
 
-	r, _ := CheckForUpdates(m, p, "v0.1.0-alpha")
+	r, _ := CheckForUpdates(m, p, i18n.I18nConf{Verbose: true, Locale: -1}, "v0.1.0-alpha")
 	assert.Equal(t, r.Name, "v0.1.0")
 	p.AssertCalled(t, "RestoreCacheRelease")
 }
@@ -77,7 +78,7 @@ func TestCheckForUpdatesRestoreCacheCurrentVersionOnTheEdge(t *testing.T) {
 	p := new(mockProvider)
 	p.On("RestoreCacheRelease").Return(&release.Release{Name: "v0.1.0"}, nil)
 
-	r, _ := CheckForUpdates(m, p, "v0.1.0")
+	r, _ := CheckForUpdates(m, p, i18n.I18nConf{Verbose: true, Locale: i18n.EN}, "v0.1.0")
 	assert.Nil(t, r)
 	p.AssertCalled(t, "RestoreCacheRelease")
 }
@@ -96,7 +97,7 @@ func TestCheckForUpdatesNoCacheFetchLastReleaseError(t *testing.T) {
 		nil, fmt.Errorf("some error"),
 	)
 
-	r, e := CheckForUpdates(m, p, "v0.1.2")
+	r, e := CheckForUpdates(m, p, i18n.I18nConf{Verbose: true, Locale: i18n.EN}, "v0.1.2")
 	assert.Nil(t, r)
 	assert.Equal(t, "some error", e.Error())
 	p.AssertCalled(t, "FetchLastRelease", m)
@@ -119,7 +120,7 @@ func TestCheckForUpdatesNoCacheCurrentVersionIsOlder(t *testing.T) {
 		}, nil,
 	)
 
-	r, _ := CheckForUpdates(m, p, "v0.1.1")
+	r, _ := CheckForUpdates(m, p, i18n.I18nConf{Verbose: true, Locale: i18n.EN}, "v0.1.1")
 	assert.Equal(t, r.Name, "v0.1.2")
 	p.AssertCalled(t, "FetchLastRelease", m)
 	p.AssertCalled(t, "CacheRelease", release.Release{Name: "v0.1.2"})
@@ -142,7 +143,7 @@ func TestCheckForUpdatesNoCacheCurrentVersionOnTheEdge(t *testing.T) {
 		}, nil,
 	)
 
-	r, _ := CheckForUpdates(m, p, "v0.1.2")
+	r, _ := CheckForUpdates(m, p, i18n.I18nConf{Verbose: true, Locale: i18n.EN}, "v0.1.2")
 	assert.Nil(t, r)
 	p.AssertCalled(t, "FetchLastRelease", m)
 	p.AssertCalled(t, "CacheRelease", release.Release{Name: "v0.1.2"})
@@ -163,7 +164,7 @@ func TestUpdateCheckVersionFail(t *testing.T) {
 	p.On("CacheRelease", release.Release{}).Return(nil)
 	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("any error"))
 
-	err := Update(m, p, "14-bis", "0.0.1")
+	err := Update(m, p, i18n.I18nConf{Verbose: true, Locale: i18n.EN}, "14-bis", "0.0.1")
 	actual := err.Error()
 	expected := "any error"
 
@@ -189,7 +190,7 @@ func TestUpdateAlreadyUpToDate(t *testing.T) {
 	p.On("CacheRelease", release.Release{Name: "v0.1.2"}).Return(nil)
 	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("no file error"))
 
-	err := Update(m, p, "14-bis", "0.1.2")
+	err := Update(m, p, i18n.I18nConf{Verbose: true, Locale: i18n.EN}, "14-bis", "0.1.2")
 	actual := err.Error()
 	expected := "already on the edge"
 
@@ -218,7 +219,7 @@ func TestUpdateDownloadFail(t *testing.T) {
 		return "", "", fmt.Errorf("download release error")
 	}
 
-	err := Update(m, p, "14-bis", "0.1.1")
+	err := Update(m, p, i18n.I18nConf{Verbose: true, Locale: i18n.EN}, "14-bis", "0.1.1")
 
 	p.AssertNotCalled(t, "FetchLastRelease")
 	p.AssertNotCalled(t, "CacheRelease")
@@ -245,7 +246,7 @@ func TestUpdateDecompressionFail(t *testing.T) {
 		return "", "", nil
 	}
 	decompress = func(src string) (int, error) { return 0, fmt.Errorf("decompression error") }
-	err := Update(m, p, "14-bis", "0.1.1")
+	err := Update(m, p, i18n.I18nConf{Verbose: true, Locale: i18n.EN}, "14-bis", "0.1.1")
 
 	p.AssertNotCalled(t, "FetchLastRelease")
 	p.AssertNotCalled(t, "CacheRelease")
@@ -273,7 +274,7 @@ func TestUpdateChecksumFail(t *testing.T) {
 	}
 	decompress = func(src string) (int, error) { return 1, nil }
 	checksumRelease = func(binPath, checksumsPath string) error { return fmt.Errorf("checksum error") }
-	err := Update(m, p, "14-bis", "0.1.1")
+	err := Update(m, p, i18n.I18nConf{Verbose: true, Locale: i18n.EN}, "14-bis", "0.1.1")
 
 	p.AssertNotCalled(t, "FetchLastRelease")
 	p.AssertNotCalled(t, "CacheRelease")
@@ -302,7 +303,7 @@ func TestUpdateInstallationFail(t *testing.T) {
 	decompress = func(src string) (int, error) { return 1, nil }
 	checksumRelease = func(binPath, checksumsPath string) error { return nil }
 	installRelease = func(srcDir string) error { return fmt.Errorf("installation error") }
-	err := Update(m, p, "14-bis", "0.1.1")
+	err := Update(m, p, i18n.I18nConf{Verbose: true, Locale: i18n.EN}, "14-bis", "0.1.1")
 
 	p.AssertNotCalled(t, "FetchLastRelease")
 	p.AssertNotCalled(t, "CacheRelease")
@@ -331,7 +332,7 @@ func TestUpdate(t *testing.T) {
 	decompress = func(src string) (int, error) { return 1, nil }
 	checksumRelease = func(binPath, checksumsPath string) error { return nil }
 	installRelease = func(srcDir string) error { return nil }
-	err := Update(m, p, "14-bis", "0.1.1")
+	err := Update(m, p, i18n.I18nConf{Verbose: true, Locale: i18n.EN}, "14-bis", "0.1.1")
 
 	p.AssertNotCalled(t, "FetchLastRelease")
 	p.AssertNotCalled(t, "CacheRelease")
