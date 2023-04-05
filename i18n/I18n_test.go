@@ -8,27 +8,27 @@ import (
 )
 
 func TestWmsgNotVerbose(t *testing.T) {
-	PrepareI18n(I18nConf{false, 0})
-	n, err := Wmsg(100)
+	err := PrepareI18n(I18nConf{false, 0})
+	assert.Nil(t, err)
+	n := Wmsg(100)
 
 	assert.Equal(t, -1, n)
-	assert.Nil(t, err)
 }
 
 func TestWmsgKeyNotFound(t *testing.T) {
-	PrepareI18n(I18nConf{true, 0})
-	n, err := Wmsg(0)
+	err := PrepareI18n(I18nConf{true, 0})
+	assert.Nil(t, err)
+	n := Wmsg(0)
 
 	assert.Equal(t, -1, n)
-	assert.Equal(t, "key '0' not found", err.Error())
 }
 
 func TestWmsg(t *testing.T) {
-	PrepareI18n(I18nConf{true, 0})
-	n, err := Wmsg(100)
+	err := PrepareI18n(I18nConf{true, 0})
+	assert.Nil(t, err)
+	n := Wmsg(100)
 
 	assert.Equal(t, 29, n)
-	assert.Nil(t, err)
 }
 
 func TestPrepareI18nInvalidLocale(t *testing.T) {

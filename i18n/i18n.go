@@ -17,19 +17,21 @@ var (
 	config I18nConf
 )
 
-func Wmsg(key int, parameters ...interface{}) (int, error) {
+func Wmsg(key int, parameters ...interface{}) int {
 	if !config.Verbose {
-		return -1, nil
+		return -1
 	}
 
 	format := msg[key]
 	if format == "" {
-		return -1, fmt.Errorf("key '%d' not found", key)
+		return -1
 	}
 
 	message := fmt.Sprintf(format, parameters...)
 
-	return fmt.Println(message)
+	n, _ := fmt.Println(message)
+
+	return n
 }
 
 func PrepareI18n(conf I18nConf) error {

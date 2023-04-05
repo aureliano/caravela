@@ -14,7 +14,7 @@ import (
 
 func TestInstall(t *testing.T) {
 	idir := filepath.Join(os.TempDir(), "14-bis", "test-install")
-	os.MkdirAll(idir, fs.ModePerm)
+	_ = os.MkdirAll(idir, fs.ModePerm)
 
 	bin := filepath.Join(idir, "qtbis")
 	readme := filepath.Join(idir, "README.md")

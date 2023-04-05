@@ -39,7 +39,11 @@ func unzip(src string) (int, error) {
 		defer in.Close()
 
 		path := filepath.Join(dir, file.Name)
-		writeFile(path, in)
+		_, err = writeFile(path, in)
+		if err != nil {
+			return counter, err
+		}
+
 		counter++
 	}
 
@@ -87,7 +91,10 @@ func untar(dir string, in io.Reader) (int, error) {
 		case tar.TypeReg:
 			{
 				path := filepath.Join(dir, name)
-				writeFile(path, tarReader)
+				_, err = writeFile(path, tarReader)
+				if err != nil {
+					return counter, err
+				}
 			}
 		default:
 			return counter, fmt.Errorf("tipo do arquivo %s desconhecido (%v?)", name, header.Typeflag)
