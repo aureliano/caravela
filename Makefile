@@ -5,9 +5,9 @@ clean:
 .PHONY: test
 test:
 	go test \
-        -v \
-        --count=1 \
-        -coverprofile cover.out \
+		-race \
+		-covermode atomic \
+		-coverprofile=cover.out \
 		./...
 	go tool cover -func cover.out
 
