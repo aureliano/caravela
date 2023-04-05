@@ -60,7 +60,7 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         path-to-lcov: cover.out
-        parallel: true
+        parallel: false
 
   test_coverage:
     needs: test
@@ -70,4 +70,3 @@ jobs:
       uses: coverallsapp/github-action@v1
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        parallel-finished: true
