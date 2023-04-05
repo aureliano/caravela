@@ -55,13 +55,6 @@ jobs:
     - name: Unit test
       run: make test
 
-    - name: Coveralls
-      uses: coverallsapp/github-action@v1
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: cover.out
-        parallel: false
-
   test_coverage:
     needs: test
     runs-on: ubuntu-latest
@@ -70,3 +63,4 @@ jobs:
       uses: coverallsapp/github-action@v1
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: cover.out
