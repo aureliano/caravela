@@ -19,6 +19,7 @@ jobs:
       uses: actions/setup-go@v3
       with:
         go-version: 1.19
+        cache: false
 
     - name: Check code format
       run: test -z "$(gofmt -l ./)"
