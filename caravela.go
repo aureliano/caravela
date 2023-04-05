@@ -51,7 +51,7 @@ func Update(client http.HttpClientPlugin, provider provider.UpdaterProvider, pna
 	fmt.Println(rel.Description)
 
 	dir := filepath.Join(os.TempDir(), pname)
-	os.MkdirAll(dir, os.ModePerm)
+	_ = os.MkdirAll(dir, os.ModePerm)
 	i18n.Wmsg(202, dir)
 
 	bin, checksums, err := downloadRelease(client, rel, dir)
