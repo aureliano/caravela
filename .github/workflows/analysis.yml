@@ -32,6 +32,6 @@ jobs:
       with:
         version: latest
         args: --verbose
-        skip-cache: false
-        skip-pkg-cache: false
-        skip-build-cache: false
+        skip-cache: true
+        skip-pkg-cache: true
+        skip-build-cache: true
