@@ -20,7 +20,7 @@ var installRelease func(srcDir string) error = file.Install
 func CheckForUpdates(client http.HttpClientPlugin, provider provider.UpdaterProvider, conf i18n.I18nConf, currver string) (*release.Release, error) {
 	err := i18n.PrepareI18n(conf)
 	if err != nil {
-		_ = i18n.PrepareI18n(i18n.I18nConf{Verbose: true, Locale: i18n.EN})
+		_ = i18n.PrepareI18n(i18n.I18nConf{Verbose: false, Locale: i18n.EN})
 		fmt.Println("Use default locale.")
 	}
 
