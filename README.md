@@ -3,7 +3,11 @@
 [![CI Pipeline](https://github.com/aureliano/caravela/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/aureliano/caravela/actions/workflows/build.yml?query=branch%3Amain)
 [![Coverage](https://coveralls.io/repos/github/aureliano/caravela/badge.svg?branch=main)](https://coveralls.io/github/aureliano/caravela?branch=main)
 
-Go module which provides an API to update programs that has a catalogue of releases such those available at Github and Gitlab.
+Caravela is a Go library for updating programs.
+
+It is intended to, given a version number, query a [catalogue of releases](https://github.com/aureliano/caravela/releases) and notify about new version or even update the program.
+
+Currently, **caravela requires Go version 1.17 or greater**. Caravela tracks Go's version support policy. We do our best not to break older versions of Go if we don't have to, but due to tooling constraints, we don't always test older versions.
 
 ## Installation
 
