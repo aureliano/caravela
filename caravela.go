@@ -21,7 +21,7 @@ func CheckForUpdates(client http.HttpClientPlugin, provider provider.UpdaterProv
 	err := i18n.PrepareI18n(conf)
 	if err != nil {
 		_ = i18n.PrepareI18n(i18n.I18nConf{Verbose: false, Locale: i18n.EN})
-		fmt.Println("Use default locale.")
+		fmt.Println("Use default I18n configuration.")
 	}
 
 	rel, err := provider.RestoreCacheRelease()
