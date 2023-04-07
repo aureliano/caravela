@@ -28,6 +28,11 @@ type GitlabRelease struct {
 }
 
 func (provider GitlabProvider) FetchLastRelease(client httpClientPlugin) (*Release, error) {
+	err := validateProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
 	releases, err := fetchReleases(provider, client)
 	if err != nil {
 		return nil, err
@@ -47,11 +52,11 @@ func (provider GitlabProvider) FetchLastRelease(client httpClientPlugin) (*Relea
 	return lastRelease, nil
 }
 
-func (provider GitlabProvider) CacheRelease(r Release) error {
+func (GitlabProvider) CacheRelease(r Release) error {
 	return serializeRelease(&r)
 }
 
-func (provider GitlabProvider) RestoreCacheRelease() (*Release, error) {
+func (GitlabProvider) RestoreCacheRelease() (*Release, error) {
 	return deserializeRelease()
 }
 
@@ -122,4 +127,16 @@ func convertToBase(r *GitlabRelease) *Release {
 	}
 
 	return &t
+}
+
+func validateProvider(p GitlabProvider) error {
+	if p.Host == "" {
+		return fmt.Errorf("host is required")
+	} else if p.Port <= 0 {
+		return fmt.Errorf("port must be > 0")
+	} else if p.ProjectPath == "" {
+		return fmt.Errorf("project path is required")
+	} else {
+		return nil
+	}
 }

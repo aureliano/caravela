@@ -22,6 +22,14 @@ func (decorator *mockDecorator) Do(req *http.Request) (*http.Response, error) {
 	return args.Get(0).(*http.Response), args.Error(1)
 }
 
+func TestFetchLastReleaseValidationError(t *testing.T) {
+	m := new(mockDecorator)
+	p := GitlabProvider{}
+
+	_, err := p.FetchLastRelease(m)
+	assert.Equal(t, "host is required", err.Error())
+}
+
 func TestFetchLastReleaseErrorOnFetchReleases(t *testing.T) {
 	m := new(mockDecorator)
 	m.On("Do", mock.Anything).Return(
@@ -30,7 +38,7 @@ func TestFetchLastReleaseErrorOnFetchReleases(t *testing.T) {
 			Body:       io.NopCloser(bytes.NewReader([]byte(``))),
 		}, nil)
 
-	provider := GitlabProvider{}
+	provider := GitlabProvider{Host: "gitlab.com", Port: 80, ProjectPath: "massis/oalienista"}
 	_, err := provider.FetchLastRelease(m)
 	m.AssertCalled(t, "Do", mock.Anything)
 	assert.Equal(t, err.Error(), "Gitlab integration error: 500")
@@ -44,7 +52,7 @@ func TestFetchLastRelease(t *testing.T) {
 			Body:       io.NopCloser(bytes.NewReader([]byte(`[{"tag_name":"v0.1.0"},{"tag_name":"v0.1.1"},{"tag_name":"v0.1.2"}]`))),
 		}, nil)
 
-	provider := GitlabProvider{}
+	provider := GitlabProvider{Host: "gitlab.com", Port: 80, ProjectPath: "massis/oalienista"}
 	actual, err := provider.FetchLastRelease(m)
 	m.AssertCalled(t, "Do", mock.Anything)
 	assert.Nil(t, err, err)
@@ -297,4 +305,33 @@ func TestConvertToBase(t *testing.T) {
 		assert.Equal(t, expected.Name, actual.Name)
 		assert.Equal(t, expected.URL, actual.URL)
 	}
+}
+
+func TestValidateProviderInvalidHost(t *testing.T) {
+	p := GitlabProvider{Host: "", Port: 80, ProjectPath: "massis/oalienista"}
+	expected := "host is required"
+	actual := validateProvider(p).Error()
+
+	assert.Equal(t, expected, actual)
+}
+
+func TestValidateProviderInvalidPort(t *testing.T) {
+	p := GitlabProvider{Host: "gitlab.com", Port: 0, ProjectPath: "massis/oalienista"}
+	expected := "port must be > 0"
+	actual := validateProvider(p).Error()
+
+	assert.Equal(t, expected, actual)
+}
+
+func TestValidateProviderInvalid(t *testing.T) {
+	p := GitlabProvider{Host: "gitlab.com", Port: 80, ProjectPath: ""}
+	expected := "project path is required"
+	actual := validateProvider(p).Error()
+
+	assert.Equal(t, expected, actual)
+}
+
+func TestValidateProvider(t *testing.T) {
+	p := GitlabProvider{Host: "gitlab.com", Port: 80, ProjectPath: "massis/oalienista"}
+	assert.Nil(t, validateProvider(p))
 }
