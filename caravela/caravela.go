@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 )
 
+// A Conf is a wrapper o data to be passed as input to the public functions.
 type Conf struct {
 	ProcessName string
 	Version     string
@@ -34,6 +35,9 @@ var mpInstall func(srcDir string) error = install
 var mpCheckForUpdates func(client httpClientPlugin, provider UpdaterProvider, currver string) (*Release, error) = checkForUpdates
 var mpUpdate func(client httpClientPlugin, provider UpdaterProvider, pname, currver string) error = update
 
+// CheckForUpdates queries, given a provider, for new releases.
+// It returns the last release available or nil if the current
+// version is already the last one.
 func CheckForUpdates(c Conf, currver string) (*Release, error) {
 	if currver == "" {
 		return nil, fmt.Errorf("current version is required")
@@ -55,6 +59,8 @@ func CheckForUpdates(c Conf, currver string) (*Release, error) {
 	return mpCheckForUpdates(&client, c.Provider, currver)
 }
 
+// Update running program to the last available release.
+// Raises an error if it's already the last version.
 func Update(c Conf, pname, currver string) error {
 	if pname == "" {
 		return fmt.Errorf("process name is required")
