@@ -85,7 +85,7 @@ func buildServiceUrl(p GitlabProvider) string {
 	if p.Ssl {
 		protocol += "s"
 	}
-	baseUrl := fmt.Sprintf("%s://%s/api/v4/projects", protocol, p.Host)
+	baseUrl := fmt.Sprintf("%s://%s:%d/api/v4/projects", protocol, p.Host, p.Port)
 
 	return fmt.Sprintf("%s/%s/releases", baseUrl, projectPath)
 }

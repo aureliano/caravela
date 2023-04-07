@@ -206,7 +206,7 @@ func TestFetchReleases(t *testing.T) {
 
 func TestBuildServiceUrl(t *testing.T) {
 	p := GitlabProvider{"www.domain.com.br", 80, false, "aureliano/caravela"}
-	expected := "http://www.domain.com.br/api/v4/projects/aureliano%2Fcaravela/releases"
+	expected := "http://www.domain.com.br:80/api/v4/projects/aureliano%2Fcaravela/releases"
 	actual := buildServiceUrl(p)
 
 	assert.Equal(t, expected, actual)
@@ -214,7 +214,7 @@ func TestBuildServiceUrl(t *testing.T) {
 
 func TestBuildServiceUrlSsl(t *testing.T) {
 	p := GitlabProvider{"www.domain.com.br", 80, true, "aureliano/caravela"}
-	expected := "https://www.domain.com.br/api/v4/projects/aureliano%2Fcaravela/releases"
+	expected := "https://www.domain.com.br:80/api/v4/projects/aureliano%2Fcaravela/releases"
 	actual := buildServiceUrl(p)
 
 	assert.Equal(t, expected, actual)
