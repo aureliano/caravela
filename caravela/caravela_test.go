@@ -58,7 +58,7 @@ func TestDo(t *testing.T) {
 }
 
 func TestCheckForUpdates2CurrentVersionIsRequired(t *testing.T) {
-	_, err := CheckForUpdates(Conf{}, "")
+	_, err := CheckForUpdates(Conf{})
 	assert.Equal(t, "current version is required", err.Error())
 }
 
@@ -66,29 +66,29 @@ func TestCheckForUpdates2I18nError(t *testing.T) {
 	mpCheckForUpdates = func(client httpClientPlugin, provider UpdaterProvider, currver string) (*Release, error) {
 		return nil, nil
 	}
-	_, _ = CheckForUpdates(Conf{I18nConf: I18nConf{Verbose: false, Locale: -1}}, "0.1.0")
+	_, _ = CheckForUpdates(Conf{I18nConf: I18nConf{Verbose: false, Locale: -1}, Version: "0.1.0"})
 }
 
 func TestCheckForUpdates2(t *testing.T) {
 	mpCheckForUpdates = func(client httpClientPlugin, provider UpdaterProvider, currver string) (*Release, error) {
 		return nil, nil
 	}
-	_, _ = CheckForUpdates(Conf{I18nConf: I18nConf{Verbose: false, Locale: PT_BR}, HttpClient: http.DefaultClient}, "0.1.0")
+	_, _ = CheckForUpdates(Conf{I18nConf: I18nConf{Verbose: false, Locale: PT_BR}, HttpClient: http.DefaultClient, Version: "0.1.0"})
 }
 
 func TestUpdateProcessNameIsRequired(t *testing.T) {
-	err := Update(Conf{}, "", "0.1.0")
+	err := Update(Conf{ProcessName: "", Version: "0.1.0"})
 	assert.Equal(t, "process name is required", err.Error())
 }
 
 func TestUpdate2I18nError(t *testing.T) {
 	mpUpdate = func(client httpClientPlugin, provider UpdaterProvider, pname, currver string) error { return nil }
-	_ = Update(Conf{I18nConf: I18nConf{Verbose: false, Locale: -1}}, "oalienista", "0.1.0")
+	_ = Update(Conf{I18nConf: I18nConf{Verbose: false, Locale: -1}, ProcessName: "oalienista", Version: "0.1.0"})
 }
 
 func TestUpdate2(t *testing.T) {
 	mpUpdate = func(client httpClientPlugin, provider UpdaterProvider, pname, currver string) error { return nil }
-	_ = Update(Conf{I18nConf: I18nConf{Verbose: false, Locale: PT_BR}}, "oalienista", "0.1.0")
+	_ = Update(Conf{I18nConf: I18nConf{Verbose: false, Locale: PT_BR}, ProcessName: "oalienista", Version: "0.1.0"})
 }
 
 func TestCheckForUpdatesRestoreCacheCurrentVersionIsOlder(t *testing.T) {

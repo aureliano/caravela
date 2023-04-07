@@ -38,8 +38,8 @@ var mpUpdate func(client httpClientPlugin, provider UpdaterProvider, pname, curr
 // CheckForUpdates queries, given a provider, for new releases.
 // It returns the last release available or nil if the current
 // version is already the last one.
-func CheckForUpdates(c Conf, currver string) (*Release, error) {
-	if currver == "" {
+func CheckForUpdates(c Conf) (*Release, error) {
+	if c.Version == "" {
 		return nil, fmt.Errorf("current version is required")
 	}
 
@@ -56,13 +56,13 @@ func CheckForUpdates(c Conf, currver string) (*Release, error) {
 		fmt.Println("Use default I18n configuration.")
 	}
 
-	return mpCheckForUpdates(&client, c.Provider, currver)
+	return mpCheckForUpdates(&client, c.Provider, c.Version)
 }
 
 // Update running program to the last available release.
 // Raises an error if it's already the last version.
-func Update(c Conf, pname, currver string) error {
-	if pname == "" {
+func Update(c Conf) error {
+	if c.ProcessName == "" {
 		return fmt.Errorf("process name is required")
 	}
 
@@ -79,7 +79,7 @@ func Update(c Conf, pname, currver string) error {
 		fmt.Println("Use default I18n configuration.")
 	}
 
-	return mpUpdate(&client, c.Provider, pname, currver)
+	return mpUpdate(&client, c.Provider, c.ProcessName, c.Version)
 }
 
 func checkForUpdates(client httpClientPlugin, provider UpdaterProvider, currver string) (*Release, error) {
