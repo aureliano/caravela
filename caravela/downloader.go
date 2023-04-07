@@ -8,11 +8,9 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-
-	httpc "github.com/aureliano/caravela/http"
 )
 
-func downloadTo(client httpc.HttpClientPlugin, release *Release, dir string) (string, string, error) {
+func downloadTo(client HttpClientPlugin, release *Release, dir string) (string, string, error) {
 	fname, furl := findReleaseFileUrl(runtime.GOOS, release)
 	if fname == "" {
 		return "", "", fmt.Errorf("não há uma versão compatível com %s", runtime.GOOS)
@@ -42,7 +40,7 @@ func downloadTo(client httpc.HttpClientPlugin, release *Release, dir string) (st
 	return fileBin, fileChecksums, nil
 }
 
-func downloadFile(client httpc.HttpClientPlugin, sourceUrl, dest string) error {
+func downloadFile(client HttpClientPlugin, sourceUrl, dest string) error {
 	file, err := os.Create(dest)
 	if err != nil {
 		os.Remove(dest)

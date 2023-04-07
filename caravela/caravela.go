@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-
-	httpc "github.com/aureliano/caravela/http"
 )
 
 type Conf struct {
@@ -17,12 +15,24 @@ type Conf struct {
 	HttpClient http.Client
 }
 
-var downloadRelease func(httpc.HttpClientPlugin, *Release, string) (string, string, error) = downloadTo
+type HttpClientDecorator struct {
+	client http.Client
+}
+
+type HttpClientPlugin interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
+func (decorator *HttpClientDecorator) Do(req *http.Request) (*http.Response, error) {
+	return decorator.client.Do(req)
+}
+
+var downloadRelease func(HttpClientPlugin, *Release, string) (string, string, error) = downloadTo
 var funcDecompress func(src string) (int, error) = decompress
 var checksumRelease func(binPath string, checksumsPath string) error = checksum
 var installRelease func(srcDir string) error = install
 
-func CheckForUpdates(client httpc.HttpClientPlugin, provider UpdaterProvider, conf I18nConf, currver string) (*Release, error) {
+func CheckForUpdates(client HttpClientPlugin, provider UpdaterProvider, conf I18nConf, currver string) (*Release, error) {
 	err := prepareI18n(conf)
 	if err != nil {
 		_ = prepareI18n(I18nConf{Verbose: false, Locale: EN})
@@ -47,7 +57,7 @@ func CheckForUpdates(client httpc.HttpClientPlugin, provider UpdaterProvider, co
 	}
 }
 
-func Update(client httpc.HttpClientPlugin, provider UpdaterProvider, conf I18nConf, pname, currver string) error {
+func Update(client HttpClientPlugin, provider UpdaterProvider, conf I18nConf, pname, currver string) error {
 	rel, err := CheckForUpdates(client, provider, conf, currver)
 	if err != nil {
 		return err

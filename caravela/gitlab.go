@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"net/url"
 	"time"
-
-	httpc "github.com/aureliano/caravela/http"
 )
 
 type GitlabProvider struct {
@@ -29,7 +27,7 @@ type GitlabRelease struct {
 	} `json:"assets"`
 }
 
-func (provider GitlabProvider) FetchLastRelease(client httpc.HttpClientPlugin) (*Release, error) {
+func (provider GitlabProvider) FetchLastRelease(client HttpClientPlugin) (*Release, error) {
 	releases, err := fetchReleases(provider, client)
 	if err != nil {
 		return nil, err
@@ -61,7 +59,7 @@ func (r1 *GitlabRelease) CompareTo(r2 *GitlabRelease) int {
 	return compareVersions(r1.Name, r2.Name)
 }
 
-func fetchReleases(p GitlabProvider, client httpc.HttpClientPlugin) ([]*Release, error) {
+func fetchReleases(p GitlabProvider, client HttpClientPlugin) ([]*Release, error) {
 	srvUrl := buildServiceUrl(p)
 	req, _ := http.NewRequest(http.MethodGet, srvUrl, nil)
 	resp, err := client.Do(req)

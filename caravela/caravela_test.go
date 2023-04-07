@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"testing"
 
-	httpc "github.com/aureliano/caravela/http"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -21,12 +20,12 @@ func (client *mockHttpClient) Do(req *http.Request) (*http.Response, error) {
 	return args.Get(0).(*http.Response), args.Error(1)
 }
 
-func (provider *mockProvider) FetchReleases(client httpc.HttpClientPlugin) ([]*Release, error) {
+func (provider *mockProvider) FetchReleases(client HttpClientPlugin) ([]*Release, error) {
 	args := provider.Called(client)
 	return args.Get(0).([]*Release), args.Error(1)
 }
 
-func (provider *mockProvider) FetchLastRelease(client httpc.HttpClientPlugin) (*Release, error) {
+func (provider *mockProvider) FetchLastRelease(client HttpClientPlugin) (*Release, error) {
 	args := provider.Called(client)
 	var rel *Release
 	if args.Get(0) != nil {
@@ -49,6 +48,13 @@ func (provider *mockProvider) RestoreCacheRelease() (*Release, error) {
 	}
 
 	return rel, args.Error(1)
+}
+
+func TestDo(t *testing.T) {
+	c := HttpClientDecorator{client: http.Client{}}
+	res, err := c.Do(&http.Request{})
+	assert.NotNil(t, err)
+	assert.Nil(t, res)
 }
 
 func TestCheckForUpdatesRestoreCacheCurrentVersionIsOlder(t *testing.T) {
@@ -213,7 +219,7 @@ func TestUpdateDownloadFail(t *testing.T) {
 	)
 	p.On("CacheRelease", Release{Name: "v0.1.2"}).Return(nil)
 	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("no file error"))
-	downloadRelease = func(hcp httpc.HttpClientPlugin, r *Release, s string) (string, string, error) {
+	downloadRelease = func(hcp HttpClientPlugin, r *Release, s string) (string, string, error) {
 		return "", "", fmt.Errorf("download release error")
 	}
 
@@ -240,7 +246,7 @@ func TestUpdateDecompressionFail(t *testing.T) {
 	)
 	p.On("CacheRelease", Release{Name: "v0.1.2"}).Return(nil)
 	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("no file error"))
-	downloadRelease = func(hcp httpc.HttpClientPlugin, r *Release, s string) (string, string, error) {
+	downloadRelease = func(hcp HttpClientPlugin, r *Release, s string) (string, string, error) {
 		return "", "", nil
 	}
 	funcDecompress = func(src string) (int, error) { return 0, fmt.Errorf("decompression error") }
@@ -267,7 +273,7 @@ func TestUpdateChecksumFail(t *testing.T) {
 	)
 	p.On("CacheRelease", Release{Name: "v0.1.2"}).Return(nil)
 	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("no file error"))
-	downloadRelease = func(hcp httpc.HttpClientPlugin, r *Release, s string) (string, string, error) {
+	downloadRelease = func(hcp HttpClientPlugin, r *Release, s string) (string, string, error) {
 		return "", "", nil
 	}
 	funcDecompress = func(src string) (int, error) { return 1, nil }
@@ -295,7 +301,7 @@ func TestUpdateInstallationFail(t *testing.T) {
 	)
 	p.On("CacheRelease", Release{Name: "v0.1.2"}).Return(nil)
 	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("no file error"))
-	downloadRelease = func(hcp httpc.HttpClientPlugin, r *Release, s string) (string, string, error) {
+	downloadRelease = func(hcp HttpClientPlugin, r *Release, s string) (string, string, error) {
 		return "", "", nil
 	}
 	funcDecompress = func(src string) (int, error) { return 1, nil }
@@ -324,7 +330,7 @@ func TestUpdate(t *testing.T) {
 	)
 	p.On("CacheRelease", Release{Name: "v0.1.2"}).Return(nil)
 	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("no file error"))
-	downloadRelease = func(hcp httpc.HttpClientPlugin, r *Release, s string) (string, string, error) {
+	downloadRelease = func(hcp HttpClientPlugin, r *Release, s string) (string, string, error) {
 		return "", "", nil
 	}
 	funcDecompress = func(src string) (int, error) { return 1, nil }
