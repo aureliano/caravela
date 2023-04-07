@@ -1,4 +1,4 @@
-package file
+package caravela
 
 import (
 	"archive/tar"
@@ -14,7 +14,7 @@ import (
 )
 
 func TestDecompressUnsupportedType(t *testing.T) {
-	done, err := Decompress("file.rar")
+	done, err := decompress("file.rar")
 	assert.True(t, done == 0)
 
 	actual := err.Error()
@@ -28,7 +28,7 @@ func TestDecompressZip(t *testing.T) {
 	zip = fmt.Sprintf("%s.zip", zip)
 	assert.Nil(t, err, err)
 
-	actual, err := Decompress(zip)
+	actual, err := decompress(zip)
 	expected := 2
 
 	assert.Nil(t, err, err)
@@ -43,7 +43,7 @@ func TestDecompressUngzip(t *testing.T) {
 	tgz = fmt.Sprintf("%s.tar.gz", tgz)
 	assert.Nil(t, err, err)
 
-	actual, err := Decompress(tgz)
+	actual, err := decompress(tgz)
 	expected := 2
 	assert.Nil(t, err, err)
 	assert.Equal(t, expected, actual)

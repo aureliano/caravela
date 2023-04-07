@@ -1,4 +1,4 @@
-package release
+package caravela
 
 import (
 	"fmt"
@@ -26,7 +26,7 @@ func TestSerializeRelease(t *testing.T) {
 		},
 	}
 
-	err := SerializeRelease(release)
+	err := serializeRelease(release)
 	assert.Nil(t, err, err)
 
 	now := time.Now().UTC()
@@ -66,7 +66,7 @@ func TestDeserializeRelease(t *testing.T) {
 	_, _ = io.WriteString(file, "{\"Name\":\"v0.1.0-dev\",\"Description\":\"Development version.\",\"ReleasedAt\":\"2023-03-06T09:59:26Z\",\"assets\":[{\"Name\":\"f1\",\"URL\":\"u1\"},{\"Name\":\"f2\",\"URL\":\"u2\"},{\"Name\":\"f3\",\"URL\":\"u3\"}]}")
 	file.Close()
 
-	actual, err := DeserializeRelease()
+	actual, err := deserializeRelease()
 	assert.Nil(t, err, err)
 
 	assert.Equal(t, release, actual)

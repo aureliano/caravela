@@ -1,4 +1,4 @@
-package file
+package caravela
 
 import (
 	"fmt"
@@ -7,13 +7,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/aureliano/caravela/i18n"
 )
 
 var osExecutable = os.Executable
 
-func Install(srcDir string) error {
+func install(srcDir string) error {
 	dir, err := homeDir()
 	if err != nil {
 		return err
@@ -32,7 +30,7 @@ func Install(srcDir string) error {
 		src := filepath.Join(srcDir, file.Name())
 		dest := filepath.Join(dir, file.Name())
 
-		i18n.Wmsg(300, src, dest)
+		wmsg(300, src, dest)
 		err = installFile(dest, src)
 		if err != nil {
 			return nil

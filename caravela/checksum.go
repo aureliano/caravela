@@ -1,4 +1,4 @@
-package file
+package caravela
 
 import (
 	"crypto/sha256"
@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func Checksum(binPath, checksumsPath string) error {
+func checksum(binPath, checksumsPath string) error {
 	hasher := sha256.New()
 	checksum, err := getChecksum(binPath, checksumsPath)
 	if err != nil {

@@ -1,4 +1,4 @@
-package i18n
+package caravela
 
 import "fmt"
 
@@ -17,7 +17,7 @@ var (
 	config I18nConf
 )
 
-func Wmsg(key int, parameters ...interface{}) int {
+func wmsg(key int, parameters ...interface{}) int {
 	if !config.Verbose {
 		return -1
 	}
@@ -34,7 +34,7 @@ func Wmsg(key int, parameters ...interface{}) int {
 	return n
 }
 
-func PrepareI18n(conf I18nConf) error {
+func prepareI18n(conf I18nConf) error {
 	err := validateLocale(conf.Locale)
 	if err != nil {
 		return err

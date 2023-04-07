@@ -1,4 +1,4 @@
-package release
+package caravela
 
 import (
 	"fmt"
@@ -10,10 +10,9 @@ import (
 	"strings"
 
 	httpc "github.com/aureliano/caravela/http"
-	"github.com/aureliano/caravela/i18n"
 )
 
-func DownloadTo(client httpc.HttpClientPlugin, release *Release, dir string) (string, string, error) {
+func downloadTo(client httpc.HttpClientPlugin, release *Release, dir string) (string, string, error) {
 	fname, furl := findReleaseFileUrl(runtime.GOOS, release)
 	if fname == "" {
 		return "", "", fmt.Errorf("não há uma versão compatível com %s", runtime.GOOS)
@@ -21,7 +20,7 @@ func DownloadTo(client httpc.HttpClientPlugin, release *Release, dir string) (st
 
 	fileBin := filepath.Join(dir, fname)
 
-	i18n.Wmsg(100)
+	wmsg(100)
 	err := downloadFile(client, furl, fileBin)
 	if err != nil {
 		return "", "", err
@@ -34,7 +33,7 @@ func DownloadTo(client httpc.HttpClientPlugin, release *Release, dir string) (st
 		return "", "", fmt.Errorf("não encontrou o arquivo %s", fname)
 	}
 
-	i18n.Wmsg(101)
+	wmsg(101)
 	err = downloadFile(client, furl, fileChecksums)
 	if err != nil {
 		return "", "", err

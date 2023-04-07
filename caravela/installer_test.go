@@ -1,4 +1,4 @@
-package file
+package caravela
 
 import (
 	"fmt"
@@ -52,7 +52,7 @@ func TestInstall(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = Install(idir)
+	err = install(idir)
 	if err != nil {
 		t.Fatal(err)
 	}

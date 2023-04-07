@@ -1,4 +1,4 @@
-package release
+package caravela
 
 import (
 	"bytes"
@@ -43,7 +43,7 @@ func TestDownloadToBinNotFound(t *testing.T) {
 		{Name: "checksums.txt", URL: "http://checksums.txt"},
 	}
 
-	_, _, err := DownloadTo(m, release, "")
+	_, _, err := downloadTo(m, release, "")
 	assert.Contains(t, err.Error(), "não há uma versão compatível com")
 	m.AssertNotCalled(t, "Do", mock.Anything)
 }
@@ -65,7 +65,7 @@ func TestDownloadToChecksumsNotFound(t *testing.T) {
 		{Name: "14-bis_Darwin_x86_64.tar.gz", URL: "http://file-darwin.tar.gz"},
 	}
 
-	_, _, err := DownloadTo(m, release, os.TempDir())
+	_, _, err := downloadTo(m, release, os.TempDir())
 	assert.Contains(t, err.Error(), "não encontrou o arquivo checksums.txt")
 	m.AssertCalled(t, "Do", mock.Anything)
 }
@@ -98,7 +98,7 @@ func TestDownloadRelease(t *testing.T) {
 	}
 
 	dir := os.TempDir()
-	abin, achecksum, err := DownloadTo(m, release, dir)
+	abin, achecksum, err := downloadTo(m, release, dir)
 	ebin, echecksum := filepath.Join(dir, fmt.Sprintf("14-bis_%s_x86_64.%s", osName, suffix)), filepath.Join(dir, "checksums.txt")
 
 	assert.Nil(t, err, err)

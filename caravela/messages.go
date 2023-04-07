@@ -1,4 +1,4 @@
-package i18n
+package caravela
 
 var ptBrMessages map[int]string = map[int]string{
 	100: "Baixando pacote de atualização.",

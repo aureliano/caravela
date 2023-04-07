@@ -1,4 +1,4 @@
-package file
+package caravela
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ func TestChecksumBinNotFound(t *testing.T) {
 	_, _ = file.WriteString("dc173fa63edc62745edaa05422a3f2d7413d36b52f10d9e6623a8a946b8792db 14-bis_Linux_x86_64.zip")
 	file.Close()
 
-	err = Checksum("/no/file", file.Name())
+	err = checksum("/no/file", file.Name())
 	assert.NotNil(t, err)
 }
 
@@ -32,7 +32,7 @@ func TestChecksumDoesntMatch(t *testing.T) {
 	_, _ = file.WriteString("12345 14-bis_Linux_x86_64.zip")
 	file.Close()
 
-	err = Checksum(zip, file.Name())
+	err = checksum(zip, file.Name())
 	actual := err.Error()
 	expected := "checksum failed"
 	assert.Equal(t, expected, actual)
@@ -50,7 +50,7 @@ func TestChecksum(t *testing.T) {
 	_, _ = file.WriteString("dc173fa63edc62745edaa05422a3f2d7413d36b52f10d9e6623a8a946b8792db 14-bis_Linux_x86_64.zip")
 	file.Close()
 
-	err = Checksum(zip, file.Name())
+	err = checksum(zip, file.Name())
 	assert.Nil(t, err, err)
 }
 

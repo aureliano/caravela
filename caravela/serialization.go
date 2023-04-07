@@ -1,4 +1,4 @@
-package release
+package caravela
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func SerializeRelease(release *Release) error {
+func serializeRelease(release *Release) error {
 	source, err := json.Marshal(release)
 	if err != nil {
 		return err
@@ -23,7 +23,7 @@ func SerializeRelease(release *Release) error {
 	return err
 }
 
-func DeserializeRelease() (*Release, error) {
+func deserializeRelease() (*Release, error) {
 	now := time.Now().UTC()
 	fname := fmt.Sprintf("release_%s.json", now.Format("2006-01-02"))
 

@@ -1,4 +1,4 @@
-package release
+package caravela
 
 import "time"
 
@@ -17,5 +17,5 @@ type Comparator interface {
 }
 
 func (r1 *Release) CompareTo(r2 *Release) int {
-	return CompareVersions(r1.Name, r2.Name)
+	return compareVersions(r1.Name, r2.Name)
 }

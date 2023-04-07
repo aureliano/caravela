@@ -1,4 +1,4 @@
-package provider
+package caravela
 
 import (
 	"bytes"
@@ -11,7 +11,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aureliano/caravela/release"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -53,7 +52,7 @@ func TestFetchLastRelease(t *testing.T) {
 }
 
 func TestCacheRelease(t *testing.T) {
-	release := &release.Release{
+	release := &Release{
 		Name:        "v0.1.0-dev",
 		Description: "Development version.",
 		ReleasedAt:  time.Date(2023, 3, 6, 9, 59, 26, 0, time.UTC),
@@ -85,7 +84,7 @@ func TestCacheRelease(t *testing.T) {
 }
 
 func TestRestoreCacheRelease(t *testing.T) {
-	release := &release.Release{
+	release := &Release{
 		Name:        "v0.1.0-dev",
 		Description: "Development version.",
 		ReleasedAt:  time.Date(2023, 3, 6, 9, 59, 26, 0, time.UTC),
@@ -116,7 +115,7 @@ func TestRestoreCacheRelease(t *testing.T) {
 	os.Remove(path)
 }
 
-func TestCompareTo(t *testing.T) {
+func TestGitlabReleaseCompareTo(t *testing.T) {
 	r1 := &GitlabRelease{Name: "v0.1.0"}
 	r2 := &GitlabRelease{Name: "v0.1.1"}
 

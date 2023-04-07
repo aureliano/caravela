@@ -1,4 +1,4 @@
-package release
+package caravela
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCompareTo(t *testing.T) {
+func TestReleaseCompareTo(t *testing.T) {
 	r1 := &Release{Name: "v0.1.0"}
 	r2 := &Release{Name: "v0.1.1"}
 

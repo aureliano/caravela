@@ -1,8 +1,8 @@
-package release
+package caravela
 
 import "testing"
 
-func TestPrivCompareVersions(t *testing.T) {
+func TestCompareVersionParts(t *testing.T) {
 	type testCase struct {
 		name     string
 		input    []string
@@ -28,7 +28,7 @@ func TestPrivCompareVersions(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			actual := compareVersions(tc.input[0], tc.input[1])
+			actual := compareVersionParts(tc.input[0], tc.input[1])
 			if actual != tc.expected {
 				t.Errorf("expected %d, got %d", tc.expected, actual)
 			}
@@ -102,7 +102,7 @@ func TestCompareVersions(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			actual := CompareVersions(tc.input[0], tc.input[1])
+			actual := compareVersions(tc.input[0], tc.input[1])
 			if actual != tc.expected {
 				t.Errorf("expected %d, got %d", tc.expected, actual)
 			}

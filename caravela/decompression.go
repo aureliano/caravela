@@ -1,4 +1,4 @@
-package file
+package caravela
 
 import (
 	"archive/tar"
@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func Decompress(src string) (int, error) {
+func decompress(src string) (int, error) {
 	if strings.HasSuffix(src, ".zip") {
 		return unzip(src)
 	} else if strings.HasSuffix(src, ".tar.gz") || strings.HasSuffix(src, ".tgz") {

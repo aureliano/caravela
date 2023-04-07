@@ -1,4 +1,4 @@
-package i18n
+package caravela
 
 import (
 	"fmt"
@@ -8,44 +8,44 @@ import (
 )
 
 func TestWmsgNotVerbose(t *testing.T) {
-	err := PrepareI18n(I18nConf{false, 0})
+	err := prepareI18n(I18nConf{false, 0})
 	assert.Nil(t, err)
-	n := Wmsg(100)
+	n := wmsg(100)
 
 	assert.Equal(t, -1, n)
 }
 
 func TestWmsgKeyNotFound(t *testing.T) {
-	err := PrepareI18n(I18nConf{true, 0})
+	err := prepareI18n(I18nConf{true, 0})
 	assert.Nil(t, err)
-	n := Wmsg(0)
+	n := wmsg(0)
 
 	assert.Equal(t, -1, n)
 }
 
 func TestWmsg(t *testing.T) {
-	err := PrepareI18n(I18nConf{true, 0})
+	err := prepareI18n(I18nConf{true, 0})
 	assert.Nil(t, err)
-	n := Wmsg(100)
+	n := wmsg(100)
 
 	assert.Equal(t, 28, n)
 }
 
 func TestPrepareI18nInvalidLocale(t *testing.T) {
-	err := PrepareI18n(I18nConf{false, -1})
+	err := prepareI18n(I18nConf{false, -1})
 	assert.Equal(t, "invalid locale -1", err.Error())
 }
 
 func TestPrepareI18n(t *testing.T) {
 	conf := I18nConf{false, PT_BR}
-	err := PrepareI18n(conf)
+	err := prepareI18n(conf)
 
 	assert.Nil(t, err)
 	assert.Equal(t, conf, config)
 	assert.Equal(t, "Baixando pacote de atualização.", msg[100])
 
 	conf = I18nConf{false, EN}
-	err = PrepareI18n(conf)
+	err = prepareI18n(conf)
 
 	assert.Nil(t, err)
 	assert.Equal(t, conf, config)

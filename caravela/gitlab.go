@@ -1,4 +1,4 @@
-package provider
+package caravela
 
 import (
 	"encoding/json"
@@ -8,7 +8,6 @@ import (
 	"time"
 
 	httpc "github.com/aureliano/caravela/http"
-	"github.com/aureliano/caravela/release"
 )
 
 type GitlabProvider struct {
@@ -30,13 +29,13 @@ type GitlabRelease struct {
 	} `json:"assets"`
 }
 
-func (provider GitlabProvider) FetchLastRelease(client httpc.HttpClientPlugin) (*release.Release, error) {
+func (provider GitlabProvider) FetchLastRelease(client httpc.HttpClientPlugin) (*Release, error) {
 	releases, err := fetchReleases(provider, client)
 	if err != nil {
 		return nil, err
 	}
 
-	var lastRelease *release.Release
+	var lastRelease *Release
 	for _, release := range releases {
 		if lastRelease == nil {
 			lastRelease = release
@@ -50,19 +49,19 @@ func (provider GitlabProvider) FetchLastRelease(client httpc.HttpClientPlugin) (
 	return lastRelease, nil
 }
 
-func (provider GitlabProvider) CacheRelease(r release.Release) error {
-	return release.SerializeRelease(&r)
+func (provider GitlabProvider) CacheRelease(r Release) error {
+	return serializeRelease(&r)
 }
 
-func (provider GitlabProvider) RestoreCacheRelease() (*release.Release, error) {
-	return release.DeserializeRelease()
+func (provider GitlabProvider) RestoreCacheRelease() (*Release, error) {
+	return deserializeRelease()
 }
 
 func (r1 *GitlabRelease) CompareTo(r2 *GitlabRelease) int {
-	return release.CompareVersions(r1.Name, r2.Name)
+	return compareVersions(r1.Name, r2.Name)
 }
 
-func fetchReleases(p GitlabProvider, client httpc.HttpClientPlugin) ([]*release.Release, error) {
+func fetchReleases(p GitlabProvider, client httpc.HttpClientPlugin) ([]*Release, error) {
 	srvUrl := buildServiceUrl(p)
 	req, _ := http.NewRequest(http.MethodGet, srvUrl, nil)
 	resp, err := client.Do(req)
@@ -93,9 +92,9 @@ func buildServiceUrl(p GitlabProvider) string {
 	return fmt.Sprintf("%s/%s/releases", baseUrl, projectPath)
 }
 
-func convertReleases(in []*GitlabRelease) []*release.Release {
+func convertReleases(in []*GitlabRelease) []*Release {
 	size := len(in)
-	rels := make([]*release.Release, size)
+	rels := make([]*Release, size)
 
 	for i, r := range in {
 		rels[i] = convertToBase(r)
@@ -104,8 +103,8 @@ func convertReleases(in []*GitlabRelease) []*release.Release {
 	return rels
 }
 
-func convertToBase(r *GitlabRelease) *release.Release {
-	t := release.Release{
+func convertToBase(r *GitlabRelease) *Release {
+	t := Release{
 		Name:        r.Name,
 		Description: r.Description,
 		ReleasedAt:  r.ReleaseAt,
