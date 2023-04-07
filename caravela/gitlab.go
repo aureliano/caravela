@@ -149,5 +149,7 @@ func initProvider(p *GitlabProvider) {
 		} else {
 			p.Port = 80
 		}
+	} else {
+		p.Ssl = p.Port == 443
 	}
 }

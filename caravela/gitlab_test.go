@@ -341,6 +341,12 @@ func TestInitProviderHttp(t *testing.T) {
 	initProvider(&p)
 
 	assert.Equal(t, uint(80), p.Port)
+	assert.False(t, p.Ssl)
+
+	p.Ssl = true
+	initProvider(&p)
+	assert.Equal(t, uint(80), p.Port)
+	assert.False(t, p.Ssl)
 }
 
 func TestInitProviderHttps(t *testing.T) {
@@ -348,4 +354,10 @@ func TestInitProviderHttps(t *testing.T) {
 	initProvider(&p)
 
 	assert.Equal(t, uint(443), p.Port)
+	assert.True(t, p.Ssl)
+
+	p.Ssl = false
+	initProvider(&p)
+	assert.Equal(t, uint(443), p.Port)
+	assert.True(t, p.Ssl)
 }
