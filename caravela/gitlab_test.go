@@ -33,7 +33,7 @@ func TestFetchLastReleaseErrorOnFetchReleases(t *testing.T) {
 	provider := GitlabProvider{}
 	_, err := provider.FetchLastRelease(m)
 	m.AssertCalled(t, "Do", mock.Anything)
-	assert.Equal(t, err.Error(), "erro na integração com o Gitlab: 500")
+	assert.Equal(t, err.Error(), "Gitlab integration error: 500")
 }
 
 func TestFetchLastRelease(t *testing.T) {

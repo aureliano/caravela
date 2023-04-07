@@ -101,7 +101,7 @@ func TestHomeDirOsExecutableFail(t *testing.T) {
 	_, err := homeDir()
 
 	actual := err.Error()
-	expected := "erro ao obter binário em execução: some error"
+	expected := "error getting running process: some error"
 
 	assert.Equal(t, expected, actual)
 }
@@ -111,7 +111,7 @@ func TestHomeDirUnknownPath(t *testing.T) {
 	_, err := homeDir()
 
 	actual := err.Error()
-	expected := "erro ao obter informacões sobre o binário: lstat /unknown/path: no such file or directory"
+	expected := "error getting information from process: lstat /unknown/path: no such file or directory"
 
 	assert.Equal(t, expected, actual)
 }

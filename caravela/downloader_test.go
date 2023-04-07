@@ -44,7 +44,7 @@ func TestDownloadToBinNotFound(t *testing.T) {
 	}
 
 	_, _, err := downloadTo(m, release, "")
-	assert.Contains(t, err.Error(), "não há uma versão compatível com")
+	assert.Contains(t, err.Error(), "there is no version compatible with")
 	m.AssertNotCalled(t, "Do", mock.Anything)
 }
 
@@ -66,7 +66,7 @@ func TestDownloadToChecksumsNotFound(t *testing.T) {
 	}
 
 	_, _, err := downloadTo(m, release, os.TempDir())
-	assert.Contains(t, err.Error(), "não encontrou o arquivo checksums.txt")
+	assert.Contains(t, err.Error(), "file checksums.txt not found")
 	m.AssertCalled(t, "Do", mock.Anything)
 }
 
@@ -138,7 +138,7 @@ func TestDownloadFile404(t *testing.T) {
 
 	dest := filepath.Join(os.TempDir(), "file-linux.tar.gz")
 	actual := downloadFile(m, "http://file-linux.tar.gz", dest)
-	expected := fmt.Errorf("erro na integração com o Gitlab: 404")
+	expected := fmt.Errorf("http error (404)")
 
 	assert.Equal(t, expected.Error(), actual.Error())
 	m.AssertCalled(t, "Do", mock.Anything)

@@ -44,12 +44,12 @@ func homeDir() (string, error) {
 	ex, err := osExecutable()
 
 	if err != nil {
-		return "", fmt.Errorf("erro ao obter binário em execução: %w", err)
+		return "", fmt.Errorf("error getting running process: %w", err)
 	}
 
 	fi, err := os.Lstat(ex)
 	if err != nil {
-		return "", fmt.Errorf("erro ao obter informacões sobre o binário: %w", err)
+		return "", fmt.Errorf("error getting information from process: %w", err)
 	}
 
 	if fi.Mode()&os.ModeSymlink == os.ModeSymlink {

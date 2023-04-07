@@ -70,7 +70,7 @@ func fetchReleases(p GitlabProvider, client httpClientPlugin) ([]*Release, error
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("erro na integração com o Gitlab: %d", resp.StatusCode)
+		return nil, fmt.Errorf("Gitlab integration error: %d", resp.StatusCode)
 	}
 
 	var releases []*GitlabRelease

@@ -18,7 +18,7 @@ func decompress(src string) (int, error) {
 		return ungzip(src)
 	} else {
 		ext := filepath.Ext(src)
-		return 0, fmt.Errorf("%s não suportado para descompressão", ext)
+		return 0, fmt.Errorf("%s not supported for decompression", ext)
 	}
 }
 
@@ -97,7 +97,7 @@ func untar(dir string, in io.Reader) (int, error) {
 				}
 			}
 		default:
-			return counter, fmt.Errorf("tipo do arquivo %s desconhecido (%v?)", name, header.Typeflag)
+			return counter, fmt.Errorf("%s has unknown type (%v?)", name, header.Typeflag)
 		}
 
 		counter++

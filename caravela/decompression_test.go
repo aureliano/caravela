@@ -18,7 +18,7 @@ func TestDecompressUnsupportedType(t *testing.T) {
 	assert.True(t, done == 0)
 
 	actual := err.Error()
-	expected := ".rar não suportado para descompressão"
+	expected := ".rar not supported for decompression"
 	assert.Equal(t, expected, actual)
 }
 

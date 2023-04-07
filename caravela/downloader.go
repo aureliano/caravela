@@ -13,7 +13,7 @@ import (
 func downloadTo(client httpClientPlugin, release *Release, dir string) (string, string, error) {
 	fname, furl := findReleaseFileUrl(runtime.GOOS, release)
 	if fname == "" {
-		return "", "", fmt.Errorf("não há uma versão compatível com %s", runtime.GOOS)
+		return "", "", fmt.Errorf("there is no version compatible with %s", runtime.GOOS)
 	}
 
 	fileBin := filepath.Join(dir, fname)
@@ -28,7 +28,7 @@ func downloadTo(client httpClientPlugin, release *Release, dir string) (string, 
 	furl = findChecksumsFileUrl(release)
 	fileChecksums := filepath.Join(dir, fname)
 	if furl == "" {
-		return "", "", fmt.Errorf("não encontrou o arquivo %s", fname)
+		return "", "", fmt.Errorf("file %s not found", fname)
 	}
 
 	wmsg(101)
@@ -56,7 +56,7 @@ func downloadFile(client httpClientPlugin, sourceUrl, dest string) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("erro na integração com o Gitlab: %d", resp.StatusCode)
+		return fmt.Errorf("http error (%d)", resp.StatusCode)
 	}
 
 	_, err = io.Copy(file, resp.Body)
