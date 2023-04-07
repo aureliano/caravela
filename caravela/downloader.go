@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func downloadTo(client HttpClientPlugin, release *Release, dir string) (string, string, error) {
+func downloadTo(client httpClientPlugin, release *Release, dir string) (string, string, error) {
 	fname, furl := findReleaseFileUrl(runtime.GOOS, release)
 	if fname == "" {
 		return "", "", fmt.Errorf("não há uma versão compatível com %s", runtime.GOOS)
@@ -40,7 +40,7 @@ func downloadTo(client HttpClientPlugin, release *Release, dir string) (string, 
 	return fileBin, fileChecksums, nil
 }
 
-func downloadFile(client HttpClientPlugin, sourceUrl, dest string) error {
+func downloadFile(client httpClientPlugin, sourceUrl, dest string) error {
 	file, err := os.Create(dest)
 	if err != nil {
 		os.Remove(dest)
