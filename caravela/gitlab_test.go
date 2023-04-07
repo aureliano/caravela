@@ -335,3 +335,17 @@ func TestValidateProvider(t *testing.T) {
 	p := GitlabProvider{Host: "gitlab.com", Port: 80, ProjectPath: "massis/oalienista"}
 	assert.Nil(t, validateProvider(p))
 }
+
+func TestInitProviderHttp(t *testing.T) {
+	p := GitlabProvider{Port: 0, Ssl: false}
+	initProvider(&p)
+
+	assert.Equal(t, uint(80), p.Port)
+}
+
+func TestInitProviderHttps(t *testing.T) {
+	p := GitlabProvider{Port: 0, Ssl: true}
+	initProvider(&p)
+
+	assert.Equal(t, uint(443), p.Port)
+}

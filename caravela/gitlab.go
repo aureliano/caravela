@@ -28,6 +28,7 @@ type GitlabRelease struct {
 }
 
 func (provider GitlabProvider) FetchLastRelease(client httpClientPlugin) (*Release, error) {
+	initProvider(&provider)
 	err := validateProvider(provider)
 	if err != nil {
 		return nil, err
@@ -138,5 +139,15 @@ func validateProvider(p GitlabProvider) error {
 		return fmt.Errorf("project path is required")
 	} else {
 		return nil
+	}
+}
+
+func initProvider(p *GitlabProvider) {
+	if p.Port == 0 {
+		if p.Ssl {
+			p.Port = 443
+		} else {
+			p.Port = 80
+		}
 	}
 }
