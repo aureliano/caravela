@@ -77,6 +77,8 @@ func update(c http.HttpClientPlugin, p provider.UpdaterProvider, conf i18n.I18nC
 	}
 }
 ```
+## Examples
+Some examples are in the examples module. There are some usage samples such as [checking for updates](./example/check_for_updates/main.go) and [update](./example/update/main.go).
 
 ## Contributing
 Please feel free to submit issues, fork the repository and send pull requests!
