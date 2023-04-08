@@ -2,6 +2,8 @@
 
 [![CI Pipeline](https://github.com/aureliano/caravela/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/aureliano/caravela/actions/workflows/build.yml?query=branch%3Amain)
 [![Coverage](https://coveralls.io/repos/github/aureliano/caravela/badge.svg?branch=main)](https://coveralls.io/github/aureliano/caravela?branch=main)
+[![caravela release (latest SemVer)](https://img.shields.io/github/v/release/aureliano/caravela?sort=semver)](https://github.com/aureliano/caravela/releases)
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/aureliano/caravela)](https://pkg.go.dev/github.com/aureliano/caravela)
 
 Caravela is a Go library for updating programs.
 
