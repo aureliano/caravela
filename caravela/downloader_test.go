@@ -36,8 +36,8 @@ func TestDownloadToBinNotFound(t *testing.T) {
 
 	release := new(provider.Release)
 	release.Assets = []struct {
-		Name string
-		URL  string
+		Name string `json:"name"`
+		URL  string `json:"url"`
 	}{
 		{Name: "14-bis_Xpto_x86_64.tar.gz", URL: "http://file-linux.tar.gz"},
 		{Name: "14-bis_Lorem_x86_64.zip", URL: "http://file-windows.zip"},
@@ -59,8 +59,8 @@ func TestDownloadToChecksumsNotFound(t *testing.T) {
 
 	release := new(provider.Release)
 	release.Assets = []struct {
-		Name string
-		URL  string
+		Name string `json:"name"`
+		URL  string `json:"url"`
 	}{
 		{Name: "14-bis_Linux_x86_64.tar.gz", URL: "http://file-linux.tar.gz"},
 		{Name: "14-bis_Windows_x86_64.zip", URL: "http://file-windows.zip"},
@@ -82,8 +82,8 @@ func TestDownloadDownloadBinError(t *testing.T) {
 
 	release := new(provider.Release)
 	release.Assets = []struct {
-		Name string
-		URL  string
+		Name string `json:"name"`
+		URL  string `json:"url"`
 	}{
 		{Name: "14-bis_Linux_x86_64.tar.gz", URL: "http://file-linux.tar.gz"},
 		{Name: "14-bis_Windows_x86_64.zip", URL: "http://file-windows.zip"},
@@ -91,7 +91,7 @@ func TestDownloadDownloadBinError(t *testing.T) {
 		{Name: "checksums.txt", URL: "http://checksums.txt"},
 	}
 
-	mpDownloadFile = func(client provider.HttpClientPlugin, sourceUrl, dest string) error {
+	mpDownloadFile = func(client provider.HTTPClientPlugin, sourceUrl, dest string) error {
 		if strings.Contains(dest, "14-bis_") {
 			return fmt.Errorf("failed to download binary")
 		}
@@ -113,8 +113,8 @@ func TestDownloadDownloadChecksumsError(t *testing.T) {
 
 	release := new(provider.Release)
 	release.Assets = []struct {
-		Name string
-		URL  string
+		Name string `json:"name"`
+		URL  string `json:"url"`
 	}{
 		{Name: "14-bis_Linux_x86_64.tar.gz", URL: "http://file-linux.tar.gz"},
 		{Name: "14-bis_Windows_x86_64.zip", URL: "http://file-windows.zip"},
@@ -122,7 +122,7 @@ func TestDownloadDownloadChecksumsError(t *testing.T) {
 		{Name: "checksums.txt", URL: "http://checksums.txt"},
 	}
 
-	mpDownloadFile = func(client provider.HttpClientPlugin, sourceUrl, dest string) error {
+	mpDownloadFile = func(client provider.HTTPClientPlugin, sourceUrl, dest string) error {
 		if strings.Contains(dest, "checksums.txt") {
 			return fmt.Errorf("failed to download checksums")
 		}
@@ -144,8 +144,8 @@ func TestDownloadRelease(t *testing.T) {
 
 	release := new(provider.Release)
 	release.Assets = []struct {
-		Name string
-		URL  string
+		Name string `json:"name"`
+		URL  string `json:"url"`
 	}{
 		{Name: "14-bis_Linux_x86_64.tar.gz", URL: "http://file-linux.tar.gz"},
 		{Name: "14-bis_Windows_x86_64.zip", URL: "http://file-windows.zip"},
@@ -219,8 +219,8 @@ func TestDownloadFile(t *testing.T) {
 		}, nil)
 	release := new(provider.Release)
 	release.Assets = []struct {
-		Name string
-		URL  string
+		Name string `json:"name"`
+		URL  string `json:"url"`
 	}{
 		{Name: "14-bis_Linux_x86_64.tar.gz", URL: "http://file-linux.tar.gz"},
 		{Name: "14-bis_Windows_x86_64.zip", URL: "http://file-windows.zip"},
@@ -249,8 +249,8 @@ func TestDownloadFile(t *testing.T) {
 func TestFetchReleaseFileUrl(t *testing.T) {
 	release := new(provider.Release)
 	release.Assets = []struct {
-		Name string
-		URL  string
+		Name string `json:"name"`
+		URL  string `json:"url"`
 	}{
 		{Name: "14-bis_Linux_x86_64.tar.gz", URL: "http://file-linux.tar.gz"},
 		{Name: "14-bis_Windows_x86_64.zip", URL: "http://file-windows.zip"},
@@ -299,8 +299,8 @@ func TestFetchReleaseFileUrl(t *testing.T) {
 func TestFindChecksumsFileUrlNoCheckSums(t *testing.T) {
 	release := new(provider.Release)
 	release.Assets = []struct {
-		Name string
-		URL  string
+		Name string `json:"name"`
+		URL  string `json:"url"`
 	}{
 		{Name: "14-bis_Linux_x86_64.tar.gz", URL: "http://file-linux.tar.gz"},
 		{Name: "14-bis_Windows_x86_64.zip", URL: "http://file-windows.zip"},
@@ -315,8 +315,8 @@ func TestFindChecksumsFileUrlNoCheckSums(t *testing.T) {
 func TestFindChecksumsFileUrl(t *testing.T) {
 	release := new(provider.Release)
 	release.Assets = []struct {
-		Name string
-		URL  string
+		Name string `json:"name"`
+		URL  string `json:"url"`
 	}{
 		{Name: "14-bis_Linux_x86_64.tar.gz", URL: "http://file-linux.tar.gz"},
 		{Name: "14-bis_Windows_x86_64.zip", URL: "http://file-windows.zip"},

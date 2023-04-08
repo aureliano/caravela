@@ -8,7 +8,7 @@ import (
 )
 
 func TestDo(t *testing.T) {
-	c := HttpClientDecorator{Client: http.Client{}}
+	c := HTTPClientDecorator{Client: http.Client{}}
 	res, err := c.Do(&http.Request{})
 	assert.NotNil(t, err)
 	assert.Nil(t, res)

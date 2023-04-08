@@ -18,7 +18,7 @@ func serializeRelease(release *Release) error {
 	fname := fmt.Sprintf("release_%s.json", now.Format("2006-01-02"))
 
 	file := filepath.Join(os.TempDir(), fname)
-	err = os.WriteFile(file, source, 0644)
+	err = os.WriteFile(file, source, 0600)
 
 	return err
 }

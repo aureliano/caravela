@@ -34,22 +34,23 @@ func TestFetchLastReleaseErrorOnFetchReleases(t *testing.T) {
 	m := new(mockDecorator)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
-			StatusCode: 500,
+			StatusCode: http.StatusInternalServerError,
 			Body:       io.NopCloser(bytes.NewReader([]byte(``))),
 		}, nil)
 
 	provider := GitlabProvider{Host: "gitlab.com", Port: 80, ProjectPath: "massis/oalienista"}
 	_, err := provider.FetchLastRelease(m)
 	m.AssertCalled(t, "Do", mock.Anything)
-	assert.Equal(t, err.Error(), "Gitlab integration error: 500")
+	assert.Equal(t, err.Error(), "gitlab integration error: 500")
 }
 
 func TestFetchLastRelease(t *testing.T) {
 	m := new(mockDecorator)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
-			StatusCode: 200,
-			Body:       io.NopCloser(bytes.NewReader([]byte(`[{"tag_name":"v0.1.0"},{"tag_name":"v0.1.1"},{"tag_name":"v0.1.2"}]`))),
+			StatusCode: http.StatusOK,
+			Body: io.NopCloser(bytes.NewReader(
+				[]byte(`[{"tag_name":"v0.1.0"},{"tag_name":"v0.1.1"},{"tag_name":"v0.1.2"}]`))),
 		}, nil)
 
 	provider := GitlabProvider{Host: "gitlab.com", Port: 80, ProjectPath: "massis/oalienista"}
@@ -65,8 +66,8 @@ func TestCacheRelease(t *testing.T) {
 		Description: "Development version.",
 		ReleasedAt:  time.Date(2023, 3, 6, 9, 59, 26, 0, time.UTC),
 		Assets: []struct {
-			Name string
-			URL  string
+			Name string `json:"name"`
+			URL  string `json:"url"`
 		}{
 			{Name: "f1", URL: "u1"},
 			{Name: "f2", URL: "u2"},
@@ -86,7 +87,9 @@ func TestCacheRelease(t *testing.T) {
 	assert.Nil(t, err, err)
 
 	json := string(bytes)
-	assert.Equal(t, "{\"Name\":\"v0.1.0-dev\",\"Description\":\"Development version.\",\"ReleasedAt\":\"2023-03-06T09:59:26Z\",\"Assets\":[{\"Name\":\"f1\",\"URL\":\"u1\"},{\"Name\":\"f2\",\"URL\":\"u2\"},{\"Name\":\"f3\",\"URL\":\"u3\"}]}", json)
+	assert.Equal(t, "{\"name\":\"v0.1.0-dev\",\"description\":\"Development version.\","+
+		"\"releasedAt\":\"2023-03-06T09:59:26Z\",\"assets\":[{\"name\":\"f1\",\"url\":\"u1\"},"+
+		"{\"name\":\"f2\",\"url\":\"u2\"},{\"name\":\"f3\",\"url\":\"u3\"}]}", json)
 
 	os.Remove(file)
 }
@@ -97,8 +100,8 @@ func TestRestoreCacheRelease(t *testing.T) {
 		Description: "Development version.",
 		ReleasedAt:  time.Date(2023, 3, 6, 9, 59, 26, 0, time.UTC),
 		Assets: []struct {
-			Name string
-			URL  string
+			Name string `json:"name"`
+			URL  string `json:"url"`
 		}{
 			{Name: "f1", URL: "u1"},
 			{Name: "f2", URL: "u2"},
@@ -113,7 +116,9 @@ func TestRestoreCacheRelease(t *testing.T) {
 
 	file, err := os.Create(path)
 	assert.Nil(t, err, err)
-	_, _ = io.WriteString(file, "{\"Name\":\"v0.1.0-dev\",\"Description\":\"Development version.\",\"ReleasedAt\":\"2023-03-06T09:59:26Z\",\"Assets\":[{\"Name\":\"f1\",\"URL\":\"u1\"},{\"Name\":\"f2\",\"URL\":\"u2\"},{\"Name\":\"f3\",\"URL\":\"u3\"}]}")
+	_, _ = io.WriteString(file, "{\"name\":\"v0.1.0-dev\",\"description\":\"Development version.\","+
+		"\"releasedAt\":\"2023-03-06T09:59:26Z\",\"Assets\":[{\"name\":\"f1\",\"url\":\"u1\"},"+
+		"{\"name\":\"f2\",\"url\":\"u2\"},{\"name\":\"f3\",\"url\":\"u3\"}]}")
 	file.Close()
 
 	actual, err := provider.RestoreCacheRelease()
@@ -134,7 +139,7 @@ func TestFetchReleasesEmpty(t *testing.T) {
 	m := new(mockDecorator)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
 		}, nil)
 
@@ -157,7 +162,7 @@ func TestFetchReleasesError(t *testing.T) {
 	m := new(mockDecorator)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
-			StatusCode: 400,
+			StatusCode: http.StatusBadRequest,
 			Body:       nil,
 		}, errors.New("http test"))
 
@@ -173,7 +178,7 @@ func TestFetchReleasesBrokenJson(t *testing.T) {
 	m := new(mockDecorator)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader([]byte(`[{]`))),
 		}, nil)
 
@@ -189,8 +194,9 @@ func TestFetchReleases(t *testing.T) {
 	m := new(mockDecorator)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
-			StatusCode: 200,
-			Body:       io.NopCloser(bytes.NewReader([]byte(`[{"tag_name":"v0.1.0"},{"tag_name":"v0.1.1"},{"tag_name":"v0.1.2"}]`))),
+			StatusCode: http.StatusOK,
+			Body: io.NopCloser(
+				bytes.NewReader([]byte(`[{"tag_name":"v0.1.0"},{"tag_name":"v0.1.1"},{"tag_name":"v0.1.2"}]`))),
 		}, nil)
 
 	provider := GitlabProvider{}
@@ -215,7 +221,7 @@ func TestFetchReleases(t *testing.T) {
 func TestBuildServiceUrl(t *testing.T) {
 	p := GitlabProvider{"www.domain.com.br", 80, false, "aureliano/caravela"}
 	expected := "http://www.domain.com.br:80/api/v4/projects/aureliano%2Fcaravela/releases"
-	actual := buildServiceUrl(p)
+	actual := buildServiceURL(p)
 
 	assert.Equal(t, expected, actual)
 }
@@ -223,7 +229,7 @@ func TestBuildServiceUrl(t *testing.T) {
 func TestBuildServiceUrlSsl(t *testing.T) {
 	p := GitlabProvider{"www.domain.com.br", 80, true, "aureliano/caravela"}
 	expected := "https://www.domain.com.br:80/api/v4/projects/aureliano%2Fcaravela/releases"
-	actual := buildServiceUrl(p)
+	actual := buildServiceURL(p)
 
 	assert.Equal(t, expected, actual)
 }

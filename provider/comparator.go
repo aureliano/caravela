@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-var releaseRegex *regexp.Regexp = regexp.MustCompile(`^v?(\d+)\.(\d+)\.(\d+)-?([\w.]+)?$`)
+var releaseRegex = regexp.MustCompile(`^v?(\d+)\.(\d+)\.(\d+)-?([\w.]+)?$`)
 
 func compareVersions(ver1, ver2 string) int {
 	match1 := releaseRegex.FindAllStringSubmatch(ver1, -1)
@@ -29,11 +29,13 @@ func compareVersions(ver1, ver2 string) int {
 
 	pr1 := match1[0][4]
 	pr2 := match2[0][4]
-	if pr1 != "" && pr2 == "" {
+
+	switch {
+	case pr1 != "" && pr2 == "":
 		return -1
-	} else if pr1 == "" && pr2 != "" {
+	case pr1 == "" && pr2 != "":
 		return 1
-	} else {
+	default:
 		return strings.Compare(match1[0][4], match2[0][4])
 	}
 }
@@ -42,11 +44,12 @@ func compareVersionParts(v1, v2 string) int {
 	iv1, _ := strconv.Atoi(v1)
 	iv2, _ := strconv.Atoi(v2)
 
-	if iv1 > iv2 {
+	switch {
+	case iv1 > iv2:
 		return 1
-	} else if iv1 == iv2 {
+	case iv1 == iv2:
 		return 0
-	} else {
+	default:
 		return -1
 	}
 }

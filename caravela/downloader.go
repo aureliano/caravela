@@ -12,9 +12,9 @@ import (
 	"github.com/aureliano/caravela/provider"
 )
 
-var mpDownloadFile func(client provider.HttpClientPlugin, sourceUrl, dest string) error = downloadFile
+var mpDownloadFile func(client provider.HTTPClientPlugin, sourceUrl, dest string) error = downloadFile
 
-func downloadTo(client provider.HttpClientPlugin, release *provider.Release, dir string) (string, string, error) {
+func downloadTo(client provider.HTTPClientPlugin, release *provider.Release, dir string) (string, string, error) {
 	fname, furl := findReleaseFileUrl(runtime.GOOS, release)
 	if fname == "" {
 		return "", "", fmt.Errorf("there is no version compatible with %s", runtime.GOOS)
@@ -44,7 +44,7 @@ func downloadTo(client provider.HttpClientPlugin, release *provider.Release, dir
 	return fileBin, fileChecksums, nil
 }
 
-func downloadFile(client provider.HttpClientPlugin, sourceUrl, dest string) error {
+func downloadFile(client provider.HTTPClientPlugin, sourceUrl, dest string) error {
 	file, err := os.Create(dest)
 	if err != nil {
 		os.Remove(dest)

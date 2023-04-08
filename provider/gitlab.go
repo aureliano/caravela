@@ -1,12 +1,15 @@
 package provider
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
 	"time"
 )
+
+const gitlabTimeout = time.Millisecond * 120
 
 // GitlabProvider is a provider for getting releases from Gitlab.
 type GitlabProvider struct {
@@ -31,7 +34,7 @@ type GitlabRelease struct {
 }
 
 // FetchLastRelease finds the last release found at Gitlab.
-func (provider GitlabProvider) FetchLastRelease(client HttpClientPlugin) (*Release, error) {
+func (provider GitlabProvider) FetchLastRelease(client HTTPClientPlugin) (*Release, error) {
 	initProvider(&provider)
 	err := validateProvider(provider)
 	if err != nil {
@@ -47,10 +50,8 @@ func (provider GitlabProvider) FetchLastRelease(client HttpClientPlugin) (*Relea
 	for _, release := range releases {
 		if lastRelease == nil {
 			lastRelease = release
-		} else {
-			if lastRelease.CompareTo(release) == -1 {
-				lastRelease = release
-			}
+		} else if lastRelease.CompareTo(release) == -1 {
+			lastRelease = release
 		}
 	}
 
@@ -72,9 +73,12 @@ func (r1 *GitlabRelease) CompareTo(r2 *GitlabRelease) int {
 	return compareVersions(r1.Name, r2.Name)
 }
 
-func fetchReleases(p GitlabProvider, client HttpClientPlugin) ([]*Release, error) {
-	srvUrl := buildServiceUrl(p)
-	req, _ := http.NewRequest(http.MethodGet, srvUrl, nil)
+func fetchReleases(p GitlabProvider, client HTTPClientPlugin) ([]*Release, error) {
+	srvURL := buildServiceURL(p)
+	ctx, cancel := context.WithTimeout(context.Background(), gitlabTimeout)
+	defer cancel()
+
+	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, srvURL, nil)
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
@@ -83,7 +87,7 @@ func fetchReleases(p GitlabProvider, client HttpClientPlugin) ([]*Release, error
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Gitlab integration error: %d", resp.StatusCode)
+		return nil, fmt.Errorf("gitlab integration error: %d", resp.StatusCode)
 	}
 
 	var releases []*GitlabRelease
@@ -92,15 +96,15 @@ func fetchReleases(p GitlabProvider, client HttpClientPlugin) ([]*Release, error
 	return convertReleases(releases), err
 }
 
-func buildServiceUrl(p GitlabProvider) string {
+func buildServiceURL(p GitlabProvider) string {
 	projectPath := url.QueryEscape(p.ProjectPath)
 	protocol := "http"
 	if p.Ssl {
 		protocol += "s"
 	}
-	baseUrl := fmt.Sprintf("%s://%s:%d/api/v4/projects", protocol, p.Host, p.Port)
+	baseURL := fmt.Sprintf("%s://%s:%d/api/v4/projects", protocol, p.Host, p.Port)
 
-	return fmt.Sprintf("%s/%s/releases", baseUrl, projectPath)
+	return fmt.Sprintf("%s/%s/releases", baseURL, projectPath)
 }
 
 func convertReleases(in []*GitlabRelease) []*Release {
@@ -123,14 +127,14 @@ func convertToBase(r *GitlabRelease) *Release {
 
 	size := len(r.Assets.Links)
 	t.Assets = make([]struct {
-		Name string
-		URL  string
+		Name string `json:"name"`
+		URL  string `json:"url"`
 	}, size)
 
 	for i, link := range r.Assets.Links {
 		t.Assets[i] = struct {
-			Name string
-			URL  string
+			Name string `json:"name"`
+			URL  string `json:"url"`
 		}{Name: link.Name, URL: link.URL}
 	}
 
@@ -138,25 +142,29 @@ func convertToBase(r *GitlabRelease) *Release {
 }
 
 func validateProvider(p GitlabProvider) error {
-	if p.Host == "" {
+	switch {
+	case p.Host == "":
 		return fmt.Errorf("host is required")
-	} else if p.Port <= 0 {
+	case p.Port <= 0:
 		return fmt.Errorf("port must be > 0")
-	} else if p.ProjectPath == "" {
+	case p.ProjectPath == "":
 		return fmt.Errorf("project path is required")
-	} else {
+	default:
 		return nil
 	}
 }
 
 func initProvider(p *GitlabProvider) {
+	const httpPort = 80
+	const httpsPort = 443
+
 	if p.Port == 0 {
 		if p.Ssl {
-			p.Port = 443
+			p.Port = httpsPort
 		} else {
-			p.Port = 80
+			p.Port = httpPort
 		}
 	} else {
-		p.Ssl = p.Port == 443
+		p.Ssl = p.Port == httpsPort
 	}
 }

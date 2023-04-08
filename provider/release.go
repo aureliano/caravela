@@ -4,13 +4,13 @@ import "time"
 
 // A Release is a basic structured data type that abstracts a project release.
 type Release struct {
-	Name        string
-	Description string
-	ReleasedAt  time.Time
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	ReleasedAt  time.Time `json:"releasedAt"`
 	Assets      []struct {
-		Name string
-		URL  string
-	}
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"assets"`
 }
 
 // Comparator is an interface which tells a type what to do to compare to releases.
