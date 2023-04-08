@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// GitlabProvider is a provider for getting releases from Gitlab.
 type GitlabProvider struct {
 	Host        string
 	Port        uint
@@ -15,6 +16,8 @@ type GitlabProvider struct {
 	ProjectPath string
 }
 
+// GitlabRelease is a representation - in JSON form - of what Gitlab
+// returns when the target service is called.
 type GitlabRelease struct {
 	Name        string    `json:"tag_name"`
 	Description string    `json:"description"`
@@ -27,6 +30,7 @@ type GitlabRelease struct {
 	} `json:"assets"`
 }
 
+// FetchLastRelease finds the last release found at Gitlab.
 func (provider GitlabProvider) FetchLastRelease(client HttpClientPlugin) (*Release, error) {
 	initProvider(&provider)
 	err := validateProvider(provider)
@@ -53,10 +57,13 @@ func (provider GitlabProvider) FetchLastRelease(client HttpClientPlugin) (*Relea
 	return lastRelease, nil
 }
 
+// CacheRelease caches the release passed as parameter on file system.
 func (GitlabProvider) CacheRelease(r Release) error {
 	return serializeRelease(&r)
 }
 
+// RestoreCacheRelease retores a cached release.
+// It returns nil if any release wasn't cached yet.
 func (GitlabProvider) RestoreCacheRelease() (*Release, error) {
 	return deserializeRelease()
 }
