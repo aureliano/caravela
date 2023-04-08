@@ -7,6 +7,7 @@ Usage:
 	import "github.com/aureliano/caravela"
 
 # Check for updates
+
 Check for updates at Gitlab:
 
 	release, err := caravela.CheckForUpdates(caravela.Conf{
@@ -25,6 +26,7 @@ Check for updates at Gitlab:
 	}
 
 # Update
+
 Update a program taking release assets from Gitlab:
 
 	err := caravela.Update(caravela.Conf{
