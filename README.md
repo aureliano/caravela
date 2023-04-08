@@ -29,53 +29,46 @@ To update Caravela to the latest version, use `go get -u github.com/aureliano/ca
 You'll usually call `Update` after the given result of `CheckForUpdates`. The sample bellow show you how to notice the user about new release available and ask him about updating.
 
 ```go
-package yours
+// ...
 
-import (
-	"fmt"
-	"os"
-
-	"github.com/aureliano/caravela"
-	"github.com/aureliano/caravela/http"
-	"github.com/aureliano/caravela/i18n"
-	"github.com/aureliano/caravela/provider"
-)
-
-func main() {
-	client, _ := http.BuildClientTls12()
-	releaseProvider := provider.GitlabProvider{
+release, err := caravela.CheckForUpdates(caravela.Conf{
+	Version: "0.1.0",
+	Provider: provider.GitlabProvider{
 		Host:        "gitlab.com",
-		Port:        80,
 		Ssl:         true,
-		ProjectPath: "massis/oalienista",
-	}
-	conf := i18n.I18nConf{Verbose: true, Locale: i18n.EN}
-	release, err := caravela.CheckForUpdates(client, releaseProvider, conf, "0.1.0")
+		ProjectPath: "gitlab-org/gitlab",
+	},
+})
 
-	if err != nil {
-		fmt.Printf("Check for updates has failed! %s\n", err)
-	} else if release != nil {
-		fmt.Printf("[WARN] There is a new version available. Would you like to update this program?")
+if err != nil {
+	fmt.Printf("Check for updates has failed! %s\n", err)
+} else {
+	fmt.Printf("[WARN] There is a new version available. Would you like to update this program?")
 
-		// ...
-        // Ask user whether to update or not.
-        // ...
+	// ...
+	// Ask user whether to update or not.
+	// ...
 
-        if shouldUpdate {
-		    update(client, releaseProvider, conf)
-        }
+	if shouldUpdate {
+		err = caravela.Update(caravela.Conf{
+			ProcessName: "oalienista",
+			Version:     "0.1.0",
+			Provider: provider.GitlabProvider{
+				Host:        "gitlab.com",
+				Ssl:         true,
+				ProjectPath: "gitlab-org/gitlab",
+			},
+		})
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		} else {
+			fmt.Printf("New version %s was successfuly installed!\n", release.Name)
+		}
 	}
 }
 
-func update(c http.HttpClientPlugin, p provider.UpdaterProvider, conf i18n.I18nConf) {
-	err := caravela.Update(c, p, conf, "oalienista", "0.1.0")
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	} else {
-		fmt.Println("New version installed!")
-	}
-}
+// ...
 ```
 ## Examples
 Some examples are in the examples module. There are some usage samples such as [checking for updates](./example/check_for_updates/main.go) and [update](./example/update/main.go).
