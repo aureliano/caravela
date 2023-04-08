@@ -20,6 +20,11 @@ func TestChecksumBinNotFound(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+func TestChecksumChecksumsNotFound(t *testing.T) {
+	err := checksum("/no/file", "/no/file")
+	assert.NotNil(t, err)
+}
+
 func TestChecksumDoesntMatch(t *testing.T) {
 	zip := filepath.Join(os.TempDir(), "14-bis_Linux_x86_64")
 	err := createZipFile(zip)

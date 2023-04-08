@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/aureliano/caravela/provider"
@@ -71,6 +72,68 @@ func TestDownloadToChecksumsNotFound(t *testing.T) {
 	m.AssertCalled(t, "Do", mock.Anything)
 }
 
+func TestDownloadDownloadBinError(t *testing.T) {
+	m := new(mockHttpPlugin)
+	m.On("Do", mock.Anything).Return(
+		&http.Response{
+			StatusCode: 200,
+			Body:       io.NopCloser(bytes.NewReader([]byte("12345"))),
+		}, nil)
+
+	release := new(provider.Release)
+	release.Assets = []struct {
+		Name string
+		URL  string
+	}{
+		{Name: "14-bis_Linux_x86_64.tar.gz", URL: "http://file-linux.tar.gz"},
+		{Name: "14-bis_Windows_x86_64.zip", URL: "http://file-windows.zip"},
+		{Name: "14-bis_Darwin_x86_64.tar.gz", URL: "http://file-darwin.tar.gz"},
+		{Name: "checksums.txt", URL: "http://checksums.txt"},
+	}
+
+	mpDownloadFile = func(client provider.HttpClientPlugin, sourceUrl, dest string) error {
+		if strings.Contains(dest, "14-bis_") {
+			return fmt.Errorf("failed to download binary")
+		}
+
+		return nil
+	}
+
+	_, _, err := downloadTo(m, release, os.TempDir())
+	assert.Equal(t, "failed to download binary", err.Error())
+}
+
+func TestDownloadDownloadChecksumsError(t *testing.T) {
+	m := new(mockHttpPlugin)
+	m.On("Do", mock.Anything).Return(
+		&http.Response{
+			StatusCode: 200,
+			Body:       io.NopCloser(bytes.NewReader([]byte("12345"))),
+		}, nil)
+
+	release := new(provider.Release)
+	release.Assets = []struct {
+		Name string
+		URL  string
+	}{
+		{Name: "14-bis_Linux_x86_64.tar.gz", URL: "http://file-linux.tar.gz"},
+		{Name: "14-bis_Windows_x86_64.zip", URL: "http://file-windows.zip"},
+		{Name: "14-bis_Darwin_x86_64.tar.gz", URL: "http://file-darwin.tar.gz"},
+		{Name: "checksums.txt", URL: "http://checksums.txt"},
+	}
+
+	mpDownloadFile = func(client provider.HttpClientPlugin, sourceUrl, dest string) error {
+		if strings.Contains(dest, "checksums.txt") {
+			return fmt.Errorf("failed to download checksums")
+		}
+
+		return nil
+	}
+
+	_, _, err := downloadTo(m, release, os.TempDir())
+	assert.Equal(t, "failed to download checksums", err.Error())
+}
+
 func TestDownloadRelease(t *testing.T) {
 	m := new(mockHttpPlugin)
 	m.On("Do", mock.Anything).Return(
@@ -97,6 +160,8 @@ func TestDownloadRelease(t *testing.T) {
 	} else {
 		suffix = "tar.gz"
 	}
+
+	mpDownloadFile = downloadFile
 
 	dir := os.TempDir()
 	abin, achecksum, err := downloadTo(m, release, dir)

@@ -12,6 +12,8 @@ import (
 	"github.com/aureliano/caravela/provider"
 )
 
+var mpDownloadFile func(client provider.HttpClientPlugin, sourceUrl, dest string) error = downloadFile
+
 func downloadTo(client provider.HttpClientPlugin, release *provider.Release, dir string) (string, string, error) {
 	fname, furl := findReleaseFileUrl(runtime.GOOS, release)
 	if fname == "" {
@@ -21,7 +23,7 @@ func downloadTo(client provider.HttpClientPlugin, release *provider.Release, dir
 	fileBin := filepath.Join(dir, fname)
 
 	wmsg(100)
-	err := downloadFile(client, furl, fileBin)
+	err := mpDownloadFile(client, furl, fileBin)
 	if err != nil {
 		return "", "", err
 	}
@@ -34,7 +36,7 @@ func downloadTo(client provider.HttpClientPlugin, release *provider.Release, dir
 	}
 
 	wmsg(101)
-	err = downloadFile(client, furl, fileChecksums)
+	err = mpDownloadFile(client, furl, fileChecksums)
 	if err != nil {
 		return "", "", err
 	}
