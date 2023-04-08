@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"testing"
 
+	pvdr "github.com/aureliano/caravela/provider"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -20,41 +21,34 @@ func (client *mockHttpClient) Do(req *http.Request) (*http.Response, error) {
 	return args.Get(0).(*http.Response), args.Error(1)
 }
 
-func (provider *mockProvider) FetchReleases(client httpClientPlugin) ([]*Release, error) {
+func (provider *mockProvider) FetchReleases(client pvdr.HttpClientPlugin) ([]*pvdr.Release, error) {
 	args := provider.Called(client)
-	return args.Get(0).([]*Release), args.Error(1)
+	return args.Get(0).([]*pvdr.Release), args.Error(1)
 }
 
-func (provider *mockProvider) FetchLastRelease(client httpClientPlugin) (*Release, error) {
+func (provider *mockProvider) FetchLastRelease(client pvdr.HttpClientPlugin) (*pvdr.Release, error) {
 	args := provider.Called(client)
-	var rel *Release
+	var rel *pvdr.Release
 	if args.Get(0) != nil {
-		rel = args.Get(0).(*Release)
+		rel = args.Get(0).(*pvdr.Release)
 	}
 
 	return rel, args.Error(1)
 }
 
-func (provider *mockProvider) CacheRelease(rel Release) error {
+func (provider *mockProvider) CacheRelease(rel pvdr.Release) error {
 	args := provider.Called(rel)
 	return args.Error(0)
 }
 
-func (provider *mockProvider) RestoreCacheRelease() (*Release, error) {
+func (provider *mockProvider) RestoreCacheRelease() (*pvdr.Release, error) {
 	args := provider.Called()
-	var rel *Release
+	var rel *pvdr.Release
 	if args.Get(0) != nil {
-		rel = args.Get(0).(*Release)
+		rel = args.Get(0).(*pvdr.Release)
 	}
 
 	return rel, args.Error(1)
-}
-
-func TestDo(t *testing.T) {
-	c := httpClientDecorator{client: http.Client{}}
-	res, err := c.Do(&http.Request{})
-	assert.NotNil(t, err)
-	assert.Nil(t, res)
 }
 
 func TestCheckForUpdates2CurrentVersionIsRequired(t *testing.T) {
@@ -63,14 +57,14 @@ func TestCheckForUpdates2CurrentVersionIsRequired(t *testing.T) {
 }
 
 func TestCheckForUpdates2I18nError(t *testing.T) {
-	mpCheckForUpdates = func(client httpClientPlugin, provider UpdaterProvider, currver string) (*Release, error) {
+	mpCheckForUpdates = func(client pvdr.HttpClientPlugin, provider pvdr.UpdaterProvider, currver string) (*pvdr.Release, error) {
 		return nil, nil
 	}
 	_, _ = CheckForUpdates(Conf{I18nConf: I18nConf{Verbose: false, Locale: -1}, Version: "0.1.0"})
 }
 
 func TestCheckForUpdates2(t *testing.T) {
-	mpCheckForUpdates = func(client httpClientPlugin, provider UpdaterProvider, currver string) (*Release, error) {
+	mpCheckForUpdates = func(client pvdr.HttpClientPlugin, provider pvdr.UpdaterProvider, currver string) (*pvdr.Release, error) {
 		return nil, nil
 	}
 	_, _ = CheckForUpdates(Conf{I18nConf: I18nConf{Verbose: false, Locale: PT_BR}, HttpClient: http.DefaultClient, Version: "0.1.0"})
@@ -82,12 +76,16 @@ func TestUpdateProcessNameIsRequired(t *testing.T) {
 }
 
 func TestUpdate2I18nError(t *testing.T) {
-	mpUpdate = func(client httpClientPlugin, provider UpdaterProvider, pname, currver string) error { return nil }
+	mpUpdate = func(client pvdr.HttpClientPlugin, provider pvdr.UpdaterProvider, pname, currver string) error {
+		return nil
+	}
 	_ = Update(Conf{I18nConf: I18nConf{Verbose: false, Locale: -1}, ProcessName: "oalienista", Version: "0.1.0"})
 }
 
 func TestUpdate2(t *testing.T) {
-	mpUpdate = func(client httpClientPlugin, provider UpdaterProvider, pname, currver string) error { return nil }
+	mpUpdate = func(client pvdr.HttpClientPlugin, provider pvdr.UpdaterProvider, pname, currver string) error {
+		return nil
+	}
 	_ = Update(Conf{I18nConf: I18nConf{Verbose: false, Locale: PT_BR}, ProcessName: "oalienista", Version: "0.1.0"})
 }
 
@@ -99,7 +97,7 @@ func TestCheckForUpdatesRestoreCacheCurrentVersionIsOlder(t *testing.T) {
 			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
 		}, nil)
 	p := new(mockProvider)
-	p.On("RestoreCacheRelease").Return(&Release{Name: "v0.1.0"}, nil)
+	p.On("RestoreCacheRelease").Return(&pvdr.Release{Name: "v0.1.0"}, nil)
 
 	r, _ := checkForUpdates(m, p, "v0.1.0-alpha")
 	assert.Equal(t, r.Name, "v0.1.0")
@@ -114,7 +112,7 @@ func TestCheckForUpdatesRestoreCacheCurrentVersionOnTheEdge(t *testing.T) {
 			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
 		}, nil)
 	p := new(mockProvider)
-	p.On("RestoreCacheRelease").Return(&Release{Name: "v0.1.0"}, nil)
+	p.On("RestoreCacheRelease").Return(&pvdr.Release{Name: "v0.1.0"}, nil)
 
 	r, _ := checkForUpdates(m, p, "v0.1.0")
 	assert.Nil(t, r)
@@ -129,7 +127,7 @@ func TestCheckForUpdatesNoCacheFetchLastReleaseError(t *testing.T) {
 			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
 		}, nil)
 	p := new(mockProvider)
-	p.On("CacheRelease", Release{Name: "v0.1.2"}).Return(nil)
+	p.On("CacheRelease", pvdr.Release{Name: "v0.1.2"}).Return(nil)
 	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("any error"))
 	p.On("FetchLastRelease", m).Return(
 		nil, fmt.Errorf("some error"),
@@ -150,10 +148,10 @@ func TestCheckForUpdatesNoCacheCurrentVersionIsOlder(t *testing.T) {
 			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
 		}, nil)
 	p := new(mockProvider)
-	p.On("CacheRelease", Release{Name: "v0.1.2"}).Return(nil)
+	p.On("CacheRelease", pvdr.Release{Name: "v0.1.2"}).Return(nil)
 	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("any error"))
 	p.On("FetchLastRelease", m).Return(
-		&Release{
+		&pvdr.Release{
 			Name: "v0.1.2",
 		}, nil,
 	)
@@ -161,7 +159,7 @@ func TestCheckForUpdatesNoCacheCurrentVersionIsOlder(t *testing.T) {
 	r, _ := checkForUpdates(m, p, "v0.1.1")
 	assert.Equal(t, r.Name, "v0.1.2")
 	p.AssertCalled(t, "FetchLastRelease", m)
-	p.AssertCalled(t, "CacheRelease", Release{Name: "v0.1.2"})
+	p.AssertCalled(t, "CacheRelease", pvdr.Release{Name: "v0.1.2"})
 	p.AssertCalled(t, "RestoreCacheRelease")
 }
 
@@ -173,10 +171,10 @@ func TestCheckForUpdatesNoCacheCurrentVersionOnTheEdge(t *testing.T) {
 			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
 		}, nil)
 	p := new(mockProvider)
-	p.On("CacheRelease", Release{Name: "v0.1.2"}).Return(nil)
+	p.On("CacheRelease", pvdr.Release{Name: "v0.1.2"}).Return(nil)
 	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("any error"))
 	p.On("FetchLastRelease", m).Return(
-		&Release{
+		&pvdr.Release{
 			Name: "v0.1.2",
 		}, nil,
 	)
@@ -184,7 +182,7 @@ func TestCheckForUpdatesNoCacheCurrentVersionOnTheEdge(t *testing.T) {
 	r, _ := checkForUpdates(m, p, "v0.1.2")
 	assert.Nil(t, r)
 	p.AssertCalled(t, "FetchLastRelease", m)
-	p.AssertCalled(t, "CacheRelease", Release{Name: "v0.1.2"})
+	p.AssertCalled(t, "CacheRelease", pvdr.Release{Name: "v0.1.2"})
 	p.AssertCalled(t, "RestoreCacheRelease")
 }
 
@@ -199,7 +197,7 @@ func TestUpdateCheckVersionFail(t *testing.T) {
 	p.On("FetchLastRelease", m).Return(
 		nil, fmt.Errorf("any error"),
 	)
-	p.On("CacheRelease", Release{}).Return(nil)
+	p.On("CacheRelease", pvdr.Release{}).Return(nil)
 	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("any error"))
 
 	err := update(m, p, "14-bis", "0.0.1")
@@ -221,11 +219,11 @@ func TestUpdateAlreadyUpToDate(t *testing.T) {
 		}, nil)
 	p := new(mockProvider)
 	p.On("FetchLastRelease", m).Return(
-		&Release{
+		&pvdr.Release{
 			Name: "v0.1.2",
 		}, nil,
 	)
-	p.On("CacheRelease", Release{Name: "v0.1.2"}).Return(nil)
+	p.On("CacheRelease", pvdr.Release{Name: "v0.1.2"}).Return(nil)
 	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("no file error"))
 
 	err := update(m, p, "14-bis", "0.1.2")
@@ -247,13 +245,13 @@ func TestUpdateDownloadFail(t *testing.T) {
 		}, nil)
 	p := new(mockProvider)
 	p.On("FetchLastRelease", m).Return(
-		&Release{
+		&pvdr.Release{
 			Name: "v0.1.2",
 		}, nil,
 	)
-	p.On("CacheRelease", Release{Name: "v0.1.2"}).Return(nil)
+	p.On("CacheRelease", pvdr.Release{Name: "v0.1.2"}).Return(nil)
 	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("no file error"))
-	mpDownloadTo = func(hcp httpClientPlugin, r *Release, s string) (string, string, error) {
+	mpDownloadTo = func(hcp pvdr.HttpClientPlugin, r *pvdr.Release, s string) (string, string, error) {
 		return "", "", fmt.Errorf("download release error")
 	}
 
@@ -274,13 +272,13 @@ func TestUpdateDecompressionFail(t *testing.T) {
 		}, nil)
 	p := new(mockProvider)
 	p.On("FetchLastRelease", m).Return(
-		&Release{
+		&pvdr.Release{
 			Name: "v0.1.2",
 		}, nil,
 	)
-	p.On("CacheRelease", Release{Name: "v0.1.2"}).Return(nil)
+	p.On("CacheRelease", pvdr.Release{Name: "v0.1.2"}).Return(nil)
 	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("no file error"))
-	mpDownloadTo = func(hcp httpClientPlugin, r *Release, s string) (string, string, error) {
+	mpDownloadTo = func(hcp pvdr.HttpClientPlugin, r *pvdr.Release, s string) (string, string, error) {
 		return "", "", nil
 	}
 	mpDecompress = func(src string) (int, error) { return 0, fmt.Errorf("decompression error") }
@@ -301,13 +299,13 @@ func TestUpdateChecksumFail(t *testing.T) {
 		}, nil)
 	p := new(mockProvider)
 	p.On("FetchLastRelease", m).Return(
-		&Release{
+		&pvdr.Release{
 			Name: "v0.1.2",
 		}, nil,
 	)
-	p.On("CacheRelease", Release{Name: "v0.1.2"}).Return(nil)
+	p.On("CacheRelease", pvdr.Release{Name: "v0.1.2"}).Return(nil)
 	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("no file error"))
-	mpDownloadTo = func(hcp httpClientPlugin, r *Release, s string) (string, string, error) {
+	mpDownloadTo = func(hcp pvdr.HttpClientPlugin, r *pvdr.Release, s string) (string, string, error) {
 		return "", "", nil
 	}
 	mpDecompress = func(src string) (int, error) { return 1, nil }
@@ -329,13 +327,13 @@ func TestUpdateInstallationFail(t *testing.T) {
 		}, nil)
 	p := new(mockProvider)
 	p.On("FetchLastRelease", m).Return(
-		&Release{
+		&pvdr.Release{
 			Name: "v0.1.2",
 		}, nil,
 	)
-	p.On("CacheRelease", Release{Name: "v0.1.2"}).Return(nil)
+	p.On("CacheRelease", pvdr.Release{Name: "v0.1.2"}).Return(nil)
 	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("no file error"))
-	mpDownloadTo = func(hcp httpClientPlugin, r *Release, s string) (string, string, error) {
+	mpDownloadTo = func(hcp pvdr.HttpClientPlugin, r *pvdr.Release, s string) (string, string, error) {
 		return "", "", nil
 	}
 	mpDecompress = func(src string) (int, error) { return 1, nil }
@@ -358,13 +356,13 @@ func TestUpdate(t *testing.T) {
 		}, nil)
 	p := new(mockProvider)
 	p.On("FetchLastRelease", m).Return(
-		&Release{
+		&pvdr.Release{
 			Name: "v0.1.2",
 		}, nil,
 	)
-	p.On("CacheRelease", Release{Name: "v0.1.2"}).Return(nil)
+	p.On("CacheRelease", pvdr.Release{Name: "v0.1.2"}).Return(nil)
 	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("no file error"))
-	mpDownloadTo = func(hcp httpClientPlugin, r *Release, s string) (string, string, error) {
+	mpDownloadTo = func(hcp pvdr.HttpClientPlugin, r *pvdr.Release, s string) (string, string, error) {
 		return "", "", nil
 	}
 	mpDecompress = func(src string) (int, error) { return 1, nil }

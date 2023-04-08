@@ -1,4 +1,4 @@
-package caravela
+package provider
 
 import (
 	"encoding/json"
@@ -27,7 +27,7 @@ type GitlabRelease struct {
 	} `json:"assets"`
 }
 
-func (provider GitlabProvider) FetchLastRelease(client httpClientPlugin) (*Release, error) {
+func (provider GitlabProvider) FetchLastRelease(client HttpClientPlugin) (*Release, error) {
 	initProvider(&provider)
 	err := validateProvider(provider)
 	if err != nil {
@@ -65,7 +65,7 @@ func (r1 *GitlabRelease) CompareTo(r2 *GitlabRelease) int {
 	return compareVersions(r1.Name, r2.Name)
 }
 
-func fetchReleases(p GitlabProvider, client httpClientPlugin) ([]*Release, error) {
+func fetchReleases(p GitlabProvider, client HttpClientPlugin) ([]*Release, error) {
 	srvUrl := buildServiceUrl(p)
 	req, _ := http.NewRequest(http.MethodGet, srvUrl, nil)
 	resp, err := client.Do(req)

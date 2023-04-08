@@ -8,9 +8,11 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/aureliano/caravela/provider"
 )
 
-func downloadTo(client httpClientPlugin, release *Release, dir string) (string, string, error) {
+func downloadTo(client provider.HttpClientPlugin, release *provider.Release, dir string) (string, string, error) {
 	fname, furl := findReleaseFileUrl(runtime.GOOS, release)
 	if fname == "" {
 		return "", "", fmt.Errorf("there is no version compatible with %s", runtime.GOOS)
@@ -40,7 +42,7 @@ func downloadTo(client httpClientPlugin, release *Release, dir string) (string, 
 	return fileBin, fileChecksums, nil
 }
 
-func downloadFile(client httpClientPlugin, sourceUrl, dest string) error {
+func downloadFile(client provider.HttpClientPlugin, sourceUrl, dest string) error {
 	file, err := os.Create(dest)
 	if err != nil {
 		os.Remove(dest)
@@ -67,7 +69,7 @@ func downloadFile(client httpClientPlugin, sourceUrl, dest string) error {
 	return nil
 }
 
-func findReleaseFileUrl(osys string, release *Release) (string, string) {
+func findReleaseFileUrl(osys string, release *provider.Release) (string, string) {
 	for _, asset := range release.Assets {
 		name := strings.ToLower(asset.Name)
 		if strings.Contains(name, osys) {
@@ -78,7 +80,7 @@ func findReleaseFileUrl(osys string, release *Release) (string, string) {
 	return "", ""
 }
 
-func findChecksumsFileUrl(release *Release) string {
+func findChecksumsFileUrl(release *provider.Release) string {
 	for _, asset := range release.Assets {
 		if asset.Name == "checksums.txt" {
 			return asset.URL

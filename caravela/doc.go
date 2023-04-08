@@ -48,7 +48,7 @@ Update a program taking release assets from Gitlab:
 
 	release, err := caravela.CheckForUpdates(caravela.Conf{
 		Version: "0.1.0",
-		Provider: caravela.GitlabProvider{
+		Provider: provider.GitlabProvider{
 			Host:        "gitlab.com",
 			Ssl:         true,
 			ProjectPath: "gitlab-org/gitlab",
@@ -68,7 +68,7 @@ Update a program taking release assets from Gitlab:
 			err = caravela.Update(caravela.Conf{
 				ProcessName: "oalienista",
 				Version:     "0.1.0",
-				Provider: caravela.GitlabProvider{
+				Provider: provider.GitlabProvider{
 					Host:        "gitlab.com",
 					Ssl:         true,
 					ProjectPath: "gitlab-org/gitlab",

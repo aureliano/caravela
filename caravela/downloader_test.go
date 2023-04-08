@@ -10,6 +10,7 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/aureliano/caravela/provider"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"golang.org/x/text/cases"
@@ -32,7 +33,7 @@ func TestDownloadToBinNotFound(t *testing.T) {
 	m := new(mockHttpPlugin)
 	m.On("Do", mock.Anything).Return(nil, nil)
 
-	release := new(Release)
+	release := new(provider.Release)
 	release.Assets = []struct {
 		Name string
 		URL  string
@@ -55,7 +56,7 @@ func TestDownloadToChecksumsNotFound(t *testing.T) {
 		Body:       io.NopCloser(bytes.NewReader([]byte("12345"))),
 	}, nil)
 
-	release := new(Release)
+	release := new(provider.Release)
 	release.Assets = []struct {
 		Name string
 		URL  string
@@ -78,7 +79,7 @@ func TestDownloadRelease(t *testing.T) {
 			Body:       io.NopCloser(bytes.NewReader([]byte("12345"))),
 		}, nil)
 
-	release := new(Release)
+	release := new(provider.Release)
 	release.Assets = []struct {
 		Name string
 		URL  string
@@ -151,7 +152,7 @@ func TestDownloadFile(t *testing.T) {
 			StatusCode: 200,
 			Body:       io.NopCloser(bytes.NewReader([]byte("12345"))),
 		}, nil)
-	release := new(Release)
+	release := new(provider.Release)
 	release.Assets = []struct {
 		Name string
 		URL  string
@@ -181,7 +182,7 @@ func TestDownloadFile(t *testing.T) {
 }
 
 func TestFetchReleaseFileUrl(t *testing.T) {
-	release := new(Release)
+	release := new(provider.Release)
 	release.Assets = []struct {
 		Name string
 		URL  string
@@ -231,7 +232,7 @@ func TestFetchReleaseFileUrl(t *testing.T) {
 }
 
 func TestFindChecksumsFileUrlNoCheckSums(t *testing.T) {
-	release := new(Release)
+	release := new(provider.Release)
 	release.Assets = []struct {
 		Name string
 		URL  string
@@ -247,7 +248,7 @@ func TestFindChecksumsFileUrlNoCheckSums(t *testing.T) {
 }
 
 func TestFindChecksumsFileUrl(t *testing.T) {
-	release := new(Release)
+	release := new(provider.Release)
 	release.Assets = []struct {
 		Name string
 		URL  string

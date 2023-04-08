@@ -8,7 +8,8 @@ test:
 		-race \
 		-covermode atomic \
 		-coverprofile=cover.out \
-		./...
+		./caravela \
+		./provider
 	go tool cover -func cover.out
 
 .PHONY: code-lint

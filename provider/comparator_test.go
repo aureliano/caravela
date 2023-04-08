@@ -1,4 +1,4 @@
-package caravela
+package provider
 
 import "testing"
 

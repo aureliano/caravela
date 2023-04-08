@@ -5,40 +5,30 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+
+	pvdr "github.com/aureliano/caravela/provider"
 )
 
 // A Conf is a wrapper o data to be passed as input to the public functions.
 type Conf struct {
 	ProcessName string
 	Version     string
-	Provider    UpdaterProvider
+	Provider    pvdr.UpdaterProvider
 	I18nConf
 	HttpClient *http.Client
 }
 
-type httpClientDecorator struct {
-	client http.Client
-}
-
-type httpClientPlugin interface {
-	Do(req *http.Request) (*http.Response, error)
-}
-
-func (decorator *httpClientDecorator) Do(req *http.Request) (*http.Response, error) {
-	return decorator.client.Do(req)
-}
-
-var mpDownloadTo func(httpClientPlugin, *Release, string) (string, string, error) = downloadTo
+var mpDownloadTo func(pvdr.HttpClientPlugin, *pvdr.Release, string) (string, string, error) = downloadTo
 var mpDecompress func(src string) (int, error) = decompress
 var mpChecksum func(binPath string, checksumsPath string) error = checksum
 var mpInstall func(srcDir string) error = install
-var mpCheckForUpdates func(client httpClientPlugin, provider UpdaterProvider, currver string) (*Release, error) = checkForUpdates
-var mpUpdate func(client httpClientPlugin, provider UpdaterProvider, pname, currver string) error = update
+var mpCheckForUpdates func(client pvdr.HttpClientPlugin, provider pvdr.UpdaterProvider, currver string) (*pvdr.Release, error) = checkForUpdates
+var mpUpdate func(client pvdr.HttpClientPlugin, provider pvdr.UpdaterProvider, pname, currver string) error = update
 
 // CheckForUpdates queries, given a provider, for new releases.
 // It returns the last release available or nil if the current
 // version is already the last one.
-func CheckForUpdates(c Conf) (*Release, error) {
+func CheckForUpdates(c Conf) (*pvdr.Release, error) {
 	if c.Version == "" {
 		return nil, fmt.Errorf("current version is required")
 	}
@@ -47,7 +37,7 @@ func CheckForUpdates(c Conf) (*Release, error) {
 		c.HttpClient = http.DefaultClient
 	}
 
-	client := httpClientDecorator{client: *c.HttpClient}
+	client := pvdr.HttpClientDecorator{Client: *c.HttpClient}
 
 	err := prepareI18n(c.I18nConf)
 	if err != nil {
@@ -70,7 +60,7 @@ func Update(c Conf) error {
 		c.HttpClient = http.DefaultClient
 	}
 
-	client := httpClientDecorator{client: *c.HttpClient}
+	client := pvdr.HttpClientDecorator{Client: *c.HttpClient}
 
 	err := prepareI18n(c.I18nConf)
 	if err != nil {
@@ -82,7 +72,7 @@ func Update(c Conf) error {
 	return mpUpdate(&client, c.Provider, c.ProcessName, c.Version)
 }
 
-func checkForUpdates(client httpClientPlugin, provider UpdaterProvider, currver string) (*Release, error) {
+func checkForUpdates(client pvdr.HttpClientPlugin, provider pvdr.UpdaterProvider, currver string) (*pvdr.Release, error) {
 	rel, err := provider.RestoreCacheRelease()
 
 	if err != nil {
@@ -94,14 +84,14 @@ func checkForUpdates(client httpClientPlugin, provider UpdaterProvider, currver 
 		_ = provider.CacheRelease(*rel)
 	}
 
-	if rel.CompareTo(&Release{Name: currver}) == 1 {
+	if rel.CompareTo(&pvdr.Release{Name: currver}) == 1 {
 		return rel, nil
 	} else {
 		return nil, nil
 	}
 }
 
-func update(client httpClientPlugin, provider UpdaterProvider, pname, currver string) error {
+func update(client pvdr.HttpClientPlugin, provider pvdr.UpdaterProvider, pname, currver string) error {
 	rel, err := checkForUpdates(client, provider, currver)
 	if err != nil {
 		return err
