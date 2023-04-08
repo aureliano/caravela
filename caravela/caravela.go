@@ -15,15 +15,15 @@ type Conf struct {
 	Version     string
 	Provider    pvdr.UpdaterProvider
 	I18nConf
-	HttpClient *http.Client
+	HTTPClient *http.Client
 }
 
-var mpDownloadTo func(pvdr.HTTPClientPlugin, *pvdr.Release, string) (string, string, error) = downloadTo
-var mpDecompress func(src string) (int, error) = decompress
-var mpChecksum func(binPath string, checksumsPath string) error = checksum
-var mpInstall func(srcDir string) error = install
-var mpCheckForUpdates func(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider, currver string) (*pvdr.Release, error) = checkForUpdates
-var mpUpdate func(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider, pname, currver string) error = update
+var mpDownloadTo = downloadTo
+var mpDecompress = decompress
+var mpChecksum = checksum
+var mpInstall = install
+var mpCheckForUpdates = checkForUpdates
+var mpUpdate = update
 
 // CheckForUpdates queries, given a provider, for new releases.
 // It returns the last release available or nil if the current
@@ -33,15 +33,15 @@ func CheckForUpdates(c Conf) (*pvdr.Release, error) {
 		return nil, fmt.Errorf("current version is required")
 	}
 
-	if c.HttpClient == nil {
-		c.HttpClient = http.DefaultClient
+	if c.HTTPClient == nil {
+		c.HTTPClient = http.DefaultClient
 	}
 
-	client := pvdr.HTTPClientDecorator{Client: *c.HttpClient}
+	client := pvdr.HTTPClientDecorator{Client: *c.HTTPClient}
 
 	err := prepareI18n(c.I18nConf)
 	if err != nil {
-		c.I18nConf = I18nConf{Verbose: false, Locale: EN}
+		c.I18nConf = I18nConf{Verbose: false, Locale: En}
 		_ = prepareI18n(c.I18nConf)
 		fmt.Println("Use default I18n configuration.")
 	}
@@ -56,15 +56,15 @@ func Update(c Conf) error {
 		return fmt.Errorf("process name is required")
 	}
 
-	if c.HttpClient == nil {
-		c.HttpClient = http.DefaultClient
+	if c.HTTPClient == nil {
+		c.HTTPClient = http.DefaultClient
 	}
 
-	client := pvdr.HTTPClientDecorator{Client: *c.HttpClient}
+	client := pvdr.HTTPClientDecorator{Client: *c.HTTPClient}
 
 	err := prepareI18n(c.I18nConf)
 	if err != nil {
-		c.I18nConf = I18nConf{Verbose: false, Locale: EN}
+		c.I18nConf = I18nConf{Verbose: false, Locale: En}
 		_ = prepareI18n(c.I18nConf)
 		fmt.Println("Use default I18n configuration.")
 	}
@@ -72,7 +72,8 @@ func Update(c Conf) error {
 	return mpUpdate(&client, c.Provider, c.ProcessName, c.Version)
 }
 
-func checkForUpdates(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider, currver string) (*pvdr.Release, error) {
+func checkForUpdates(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider,
+	currver string) (*pvdr.Release, error) {
 	rel, err := provider.RestoreCacheRelease()
 
 	if err != nil {
@@ -86,9 +87,9 @@ func checkForUpdates(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider
 
 	if rel.CompareTo(&pvdr.Release{Name: currver}) == 1 {
 		return rel, nil
-	} else {
-		return nil, nil
 	}
+
+	return nil, fmt.Errorf("already on the edge")
 }
 
 func update(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider, pname, currver string) error {
@@ -98,10 +99,6 @@ func update(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider, pname, 
 	}
 
 	wmsg(200)
-
-	if rel == nil {
-		return fmt.Errorf("already on the edge")
-	}
 
 	wmsg(201, rel.Name)
 	fmt.Println(rel.Description)

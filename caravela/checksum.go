@@ -22,7 +22,7 @@ func checksum(binPath, checksumsPath string) error {
 		return err
 	}
 
-	if _, err := io.Copy(hasher, binFile); err != nil {
+	if _, err = io.Copy(hasher, binFile); err != nil {
 		return err
 	}
 

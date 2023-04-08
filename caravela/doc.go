@@ -1,6 +1,7 @@
 /*
 Caravela is a Go library for updating programs.
-It is intended to, given a version number, query a catalogue of releases and notify about new version or even update the program.
+It is intended to, given a version number, query a catalogue of releases and notify about
+new version or even update the program.
 
 Usage:
 

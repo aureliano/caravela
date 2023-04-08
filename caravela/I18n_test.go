@@ -37,20 +37,19 @@ func TestPrepareI18nInvalidLocale(t *testing.T) {
 }
 
 func TestPrepareI18n(t *testing.T) {
-	conf := I18nConf{false, PT_BR}
+	conf := I18nConf{false, PtBr}
 	err := prepareI18n(conf)
 
 	assert.Nil(t, err)
 	assert.Equal(t, conf, config)
 	assert.Equal(t, "Baixando pacote de atualização.", msg[100])
 
-	conf = I18nConf{false, EN}
+	conf = I18nConf{false, En}
 	err = prepareI18n(conf)
 
 	assert.Nil(t, err)
 	assert.Equal(t, conf, config)
 	assert.Equal(t, "Downloading update package.", msg[100])
-
 }
 
 func TestValidateLocale(t *testing.T) {

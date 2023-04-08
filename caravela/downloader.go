@@ -1,6 +1,7 @@
 package caravela
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -8,14 +9,17 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/aureliano/caravela/provider"
 )
 
-var mpDownloadFile func(client provider.HTTPClientPlugin, sourceUrl, dest string) error = downloadFile
+const downloadTimeout = time.Second * 120
+
+var mpDownloadFile = downloadFile
 
 func downloadTo(client provider.HTTPClientPlugin, release *provider.Release, dir string) (string, string, error) {
-	fname, furl := findReleaseFileUrl(runtime.GOOS, release)
+	fname, furl := findReleaseFileURL(runtime.GOOS, release)
 	if fname == "" {
 		return "", "", fmt.Errorf("there is no version compatible with %s", runtime.GOOS)
 	}
@@ -29,7 +33,7 @@ func downloadTo(client provider.HTTPClientPlugin, release *provider.Release, dir
 	}
 
 	fname = "checksums.txt"
-	furl = findChecksumsFileUrl(release)
+	furl = findChecksumsFileURL(release)
 	fileChecksums := filepath.Join(dir, fname)
 	if furl == "" {
 		return "", "", fmt.Errorf("file %s not found", fname)
@@ -44,7 +48,7 @@ func downloadTo(client provider.HTTPClientPlugin, release *provider.Release, dir
 	return fileBin, fileChecksums, nil
 }
 
-func downloadFile(client provider.HTTPClientPlugin, sourceUrl, dest string) error {
+func downloadFile(client provider.HTTPClientPlugin, sourceURL, dest string) error {
 	file, err := os.Create(dest)
 	if err != nil {
 		os.Remove(dest)
@@ -52,7 +56,10 @@ func downloadFile(client provider.HTTPClientPlugin, sourceUrl, dest string) erro
 	}
 	defer file.Close()
 
-	req, _ := http.NewRequest(http.MethodGet, sourceUrl, nil)
+	ctx, cancel := context.WithTimeout(context.Background(), downloadTimeout)
+	defer cancel()
+
+	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, sourceURL, nil)
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
@@ -71,7 +78,7 @@ func downloadFile(client provider.HTTPClientPlugin, sourceUrl, dest string) erro
 	return nil
 }
 
-func findReleaseFileUrl(osys string, release *provider.Release) (string, string) {
+func findReleaseFileURL(osys string, release *provider.Release) (string, string) {
 	for _, asset := range release.Assets {
 		name := strings.ToLower(asset.Name)
 		if strings.Contains(name, osys) {
@@ -82,7 +89,7 @@ func findReleaseFileUrl(osys string, release *provider.Release) (string, string)
 	return "", ""
 }
 
-func findChecksumsFileUrl(release *provider.Release) string {
+func findChecksumsFileURL(release *provider.Release) string {
 	for _, asset := range release.Assets {
 		if asset.Name == "checksums.txt" {
 			return asset.URL

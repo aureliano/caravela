@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-var osExecutable = os.Executable
+var _mpOsExecutable = os.Executable
 
 func install(srcDir string) error {
 	dir, err := homeDir()
@@ -23,7 +23,9 @@ func install(srcDir string) error {
 	}
 
 	for _, file := range files {
-		if strings.HasSuffix(file.Name(), "tar.gz") || strings.HasSuffix(file.Name(), "zip") || file.Name() == "checksums.txt" {
+		if strings.HasSuffix(file.Name(), "tar.gz") ||
+			strings.HasSuffix(file.Name(), "zip") ||
+			file.Name() == "checksums.txt" {
 			continue
 		}
 
@@ -33,7 +35,7 @@ func install(srcDir string) error {
 		wmsg(300, src, dest)
 		err = installFile(dest, src)
 		if err != nil {
-			return nil
+			return err
 		}
 	}
 
@@ -41,7 +43,7 @@ func install(srcDir string) error {
 }
 
 func homeDir() (string, error) {
-	ex, err := osExecutable()
+	ex, err := _mpOsExecutable()
 
 	if err != nil {
 		return "", fmt.Errorf("error getting running process: %w", err)
@@ -53,7 +55,9 @@ func homeDir() (string, error) {
 	}
 
 	if fi.Mode()&os.ModeSymlink == os.ModeSymlink {
-		path, err := filepath.EvalSymlinks(ex)
+		var path string
+		path, err = filepath.EvalSymlinks(ex)
+
 		if err != nil {
 			return "", err
 		}
@@ -71,7 +75,8 @@ func installFile(dest, src string) error {
 
 	if os.IsNotExist(err) {
 		fileExist = false
-		fm = fs.FileMode(0644)
+		const permFile = 0644
+		fm = fs.FileMode(permFile)
 	} else if err != nil {
 		return err
 	}
@@ -80,7 +85,7 @@ func installFile(dest, src string) error {
 		if err = os.Remove(dest); err != nil {
 			return err
 		}
-		fm = fs.FileMode(destInfo.Mode())
+		fm = destInfo.Mode()
 	}
 
 	out, err := os.OpenFile(dest, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, fm)

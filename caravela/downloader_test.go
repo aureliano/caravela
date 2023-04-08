@@ -18,9 +18,9 @@ import (
 	"golang.org/x/text/language"
 )
 
-type mockHttpPlugin struct{ mock.Mock }
+type mockHTTPPlugin struct{ mock.Mock }
 
-func (plugin *mockHttpPlugin) Do(req *http.Request) (*http.Response, error) {
+func (plugin *mockHTTPPlugin) Do(req *http.Request) (*http.Response, error) {
 	args := plugin.Called(req)
 	var res *http.Response
 	if args.Get(0) != nil {
@@ -31,7 +31,7 @@ func (plugin *mockHttpPlugin) Do(req *http.Request) (*http.Response, error) {
 }
 
 func TestDownloadToBinNotFound(t *testing.T) {
-	m := new(mockHttpPlugin)
+	m := new(mockHTTPPlugin)
 	m.On("Do", mock.Anything).Return(nil, nil)
 
 	release := new(provider.Release)
@@ -51,9 +51,9 @@ func TestDownloadToBinNotFound(t *testing.T) {
 }
 
 func TestDownloadToChecksumsNotFound(t *testing.T) {
-	m := new(mockHttpPlugin)
+	m := new(mockHTTPPlugin)
 	m.On("Do", mock.Anything).Return(&http.Response{
-		StatusCode: 200,
+		StatusCode: http.StatusOK,
 		Body:       io.NopCloser(bytes.NewReader([]byte("12345"))),
 	}, nil)
 
@@ -73,10 +73,10 @@ func TestDownloadToChecksumsNotFound(t *testing.T) {
 }
 
 func TestDownloadDownloadBinError(t *testing.T) {
-	m := new(mockHttpPlugin)
+	m := new(mockHTTPPlugin)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader([]byte("12345"))),
 		}, nil)
 
@@ -104,10 +104,10 @@ func TestDownloadDownloadBinError(t *testing.T) {
 }
 
 func TestDownloadDownloadChecksumsError(t *testing.T) {
-	m := new(mockHttpPlugin)
+	m := new(mockHTTPPlugin)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader([]byte("12345"))),
 		}, nil)
 
@@ -135,10 +135,10 @@ func TestDownloadDownloadChecksumsError(t *testing.T) {
 }
 
 func TestDownloadRelease(t *testing.T) {
-	m := new(mockHttpPlugin)
+	m := new(mockHTTPPlugin)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader([]byte("12345"))),
 		}, nil)
 
@@ -165,7 +165,8 @@ func TestDownloadRelease(t *testing.T) {
 
 	dir := os.TempDir()
 	abin, achecksum, err := downloadTo(m, release, dir)
-	ebin, echecksum := filepath.Join(dir, fmt.Sprintf("14-bis_%s_x86_64.%s", osName, suffix)), filepath.Join(dir, "checksums.txt")
+	ebin, echecksum := filepath.Join(dir, fmt.Sprintf(
+		"14-bis_%s_x86_64.%s", osName, suffix)), filepath.Join(dir, "checksums.txt")
 
 	assert.Nil(t, err, err)
 	assert.Equal(t, ebin, abin)
@@ -174,7 +175,7 @@ func TestDownloadRelease(t *testing.T) {
 }
 
 func TestDownloadFileWrongDest(t *testing.T) {
-	m := new(mockHttpPlugin)
+	m := new(mockHTTPPlugin)
 	m.On("Do", mock.Anything).Return(nil, nil)
 
 	err := downloadFile(m, "http://file-linux.tar.gz", filepath.Join("unknown", "path"))
@@ -183,7 +184,7 @@ func TestDownloadFileWrongDest(t *testing.T) {
 }
 
 func TestDownloadFileHttpError(t *testing.T) {
-	m := new(mockHttpPlugin)
+	m := new(mockHTTPPlugin)
 	m.On("Do", mock.Anything).Return(nil, fmt.Errorf("some error"))
 
 	dest := filepath.Join(os.TempDir(), "file-linux.tar.gz")
@@ -195,10 +196,10 @@ func TestDownloadFileHttpError(t *testing.T) {
 }
 
 func TestDownloadFile404(t *testing.T) {
-	m := new(mockHttpPlugin)
+	m := new(mockHTTPPlugin)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
-			StatusCode: 404,
+			StatusCode: http.StatusNotFound,
 			Body:       io.NopCloser(bytes.NewReader([]byte("not found"))),
 		}, nil)
 
@@ -211,22 +212,12 @@ func TestDownloadFile404(t *testing.T) {
 }
 
 func TestDownloadFile(t *testing.T) {
-	m := new(mockHttpPlugin)
+	m := new(mockHTTPPlugin)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader([]byte("12345"))),
 		}, nil)
-	release := new(provider.Release)
-	release.Assets = []struct {
-		Name string `json:"name"`
-		URL  string `json:"url"`
-	}{
-		{Name: "14-bis_Linux_x86_64.tar.gz", URL: "http://file-linux.tar.gz"},
-		{Name: "14-bis_Windows_x86_64.zip", URL: "http://file-windows.zip"},
-		{Name: "14-bis_Darwin_x86_64.tar.gz", URL: "http://file-darwin.tar.gz"},
-		{Name: "checksums.txt", URL: "http://checksums.txt"},
-	}
 
 	dest := filepath.Join(os.TempDir(), "file-linux.tar.gz")
 	err := downloadFile(m, "http://file-linux.tar.gz", dest)
@@ -288,7 +279,7 @@ func TestFetchReleaseFileUrl(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			name, url := findReleaseFileUrl(tc.input, release)
+			name, url := findReleaseFileURL(tc.input, release)
 			if name != tc.expected[0] && url != tc.expected[1] {
 				t.Errorf("expected [%s,  %s], but got [%s, %s]", tc.expected[0], tc.expected[1], name, url)
 			}
@@ -307,7 +298,7 @@ func TestFindChecksumsFileUrlNoCheckSums(t *testing.T) {
 		{Name: "14-bis_Darwin_x86_64.tar.gz", URL: "http://file-darwin.tar.gz"},
 	}
 
-	actual := findChecksumsFileUrl(release)
+	actual := findChecksumsFileURL(release)
 	expected := ""
 	assert.Equal(t, expected, actual)
 }
@@ -324,7 +315,7 @@ func TestFindChecksumsFileUrl(t *testing.T) {
 		{Name: "checksums.txt", URL: "http://checksums.txt"},
 	}
 
-	actual := findChecksumsFileUrl(release)
+	actual := findChecksumsFileURL(release)
 	expected := "http://checksums.txt"
 	assert.Equal(t, expected, actual)
 }

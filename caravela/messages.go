@@ -1,6 +1,6 @@
 package caravela
 
-var ptBrMessages map[int]string = map[int]string{
+var ptBrMessages = map[int]string{
 	100: "Baixando pacote de atualização.",
 	101: "Baixando checksum.",
 	200: "Verificando a existência de versão mais recente.",
@@ -12,7 +12,7 @@ var ptBrMessages map[int]string = map[int]string{
 	300: "Copiar %s para %s",
 }
 
-var enMessages map[int]string = map[int]string{
+var enMessages = map[int]string{
 	100: "Downloading update package.",
 	101: "Downloading checksum file.",
 	200: "Checking for the latest version.",

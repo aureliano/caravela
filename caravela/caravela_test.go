@@ -12,11 +12,11 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type mockHttpClient struct{ mock.Mock }
+type mockHTTPClient struct{ mock.Mock }
 
 type mockProvider struct{ mock.Mock }
 
-func (client *mockHttpClient) Do(req *http.Request) (*http.Response, error) {
+func (client *mockHTTPClient) Do(req *http.Request) (*http.Response, error) {
 	args := client.Called(req)
 	return args.Get(0).(*http.Response), args.Error(1)
 }
@@ -51,23 +51,32 @@ func (provider *mockProvider) RestoreCacheRelease() (*pvdr.Release, error) {
 	return rel, args.Error(1)
 }
 
-func TestCheckForUpdates2CurrentVersionIsRequired(t *testing.T) {
+func TestCheckForUpdatesCurrentVersionIsRequired(t *testing.T) {
 	_, err := CheckForUpdates(Conf{})
 	assert.Equal(t, "current version is required", err.Error())
 }
 
-func TestCheckForUpdates2I18nError(t *testing.T) {
-	mpCheckForUpdates = func(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider, currver string) (*pvdr.Release, error) {
-		return nil, nil
+func TestCheckForUpdatesI18nError(t *testing.T) {
+	mpCheckForUpdates = func(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider,
+		currver string) (*pvdr.Release, error) {
+		return nil, fmt.Errorf("already on the edge")
 	}
-	_, _ = CheckForUpdates(Conf{I18nConf: I18nConf{Verbose: false, Locale: -1}, Version: "0.1.0"})
+
+	r, err := CheckForUpdates(Conf{I18nConf: I18nConf{Verbose: false, Locale: -1}, Version: "0.1.0"})
+	assert.Nil(t, r)
+	assert.Equal(t, "already on the edge", err.Error())
 }
 
-func TestCheckForUpdates2(t *testing.T) {
-	mpCheckForUpdates = func(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider, currver string) (*pvdr.Release, error) {
-		return nil, nil
+func TestCheckForUpdates(t *testing.T) {
+	mpCheckForUpdates = func(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider,
+		currver string) (*pvdr.Release, error) {
+		return nil, fmt.Errorf("already on the edge")
 	}
-	_, _ = CheckForUpdates(Conf{I18nConf: I18nConf{Verbose: false, Locale: PT_BR}, HttpClient: http.DefaultClient, Version: "0.1.0"})
+
+	r, err := CheckForUpdates(Conf{I18nConf: I18nConf{Verbose: false, Locale: PtBr},
+		HTTPClient: http.DefaultClient, Version: "0.1.0"})
+	assert.Nil(t, r)
+	assert.Equal(t, "already on the edge", err.Error())
 }
 
 func TestUpdateProcessNameIsRequired(t *testing.T) {
@@ -75,25 +84,20 @@ func TestUpdateProcessNameIsRequired(t *testing.T) {
 	assert.Equal(t, "process name is required", err.Error())
 }
 
-func TestUpdate2I18nError(t *testing.T) {
+func TestUpdateI18nError(t *testing.T) {
 	mpUpdate = func(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider, pname, currver string) error {
 		return nil
 	}
-	_ = Update(Conf{I18nConf: I18nConf{Verbose: false, Locale: -1}, ProcessName: "oalienista", Version: "0.1.0"})
-}
 
-func TestUpdate2(t *testing.T) {
-	mpUpdate = func(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider, pname, currver string) error {
-		return nil
-	}
-	_ = Update(Conf{I18nConf: I18nConf{Verbose: false, Locale: PT_BR}, ProcessName: "oalienista", Version: "0.1.0"})
+	err := Update(Conf{I18nConf: I18nConf{Verbose: false, Locale: -1}, ProcessName: "oalienista", Version: "0.1.0"})
+	assert.Nil(t, err)
 }
 
 func TestCheckForUpdatesRestoreCacheCurrentVersionIsOlder(t *testing.T) {
-	m := new(mockHttpClient)
+	m := new(mockHTTPClient)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
 		}, nil)
 	p := new(mockProvider)
@@ -105,10 +109,10 @@ func TestCheckForUpdatesRestoreCacheCurrentVersionIsOlder(t *testing.T) {
 }
 
 func TestCheckForUpdatesRestoreCacheCurrentVersionOnTheEdge(t *testing.T) {
-	m := new(mockHttpClient)
+	m := new(mockHTTPClient)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
 		}, nil)
 	p := new(mockProvider)
@@ -120,10 +124,10 @@ func TestCheckForUpdatesRestoreCacheCurrentVersionOnTheEdge(t *testing.T) {
 }
 
 func TestCheckForUpdatesNoCacheFetchLastReleaseError(t *testing.T) {
-	m := new(mockHttpClient)
+	m := new(mockHTTPClient)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
 		}, nil)
 	p := new(mockProvider)
@@ -141,10 +145,10 @@ func TestCheckForUpdatesNoCacheFetchLastReleaseError(t *testing.T) {
 }
 
 func TestCheckForUpdatesNoCacheCurrentVersionIsOlder(t *testing.T) {
-	m := new(mockHttpClient)
+	m := new(mockHTTPClient)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
 		}, nil)
 	p := new(mockProvider)
@@ -164,10 +168,10 @@ func TestCheckForUpdatesNoCacheCurrentVersionIsOlder(t *testing.T) {
 }
 
 func TestCheckForUpdatesNoCacheCurrentVersionOnTheEdge(t *testing.T) {
-	m := new(mockHttpClient)
+	m := new(mockHTTPClient)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
 		}, nil)
 	p := new(mockProvider)
@@ -187,10 +191,10 @@ func TestCheckForUpdatesNoCacheCurrentVersionOnTheEdge(t *testing.T) {
 }
 
 func TestUpdateCheckVersionFail(t *testing.T) {
-	m := new(mockHttpClient)
+	m := new(mockHTTPClient)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader([]byte(``))),
 		}, nil)
 	p := new(mockProvider)
@@ -211,10 +215,10 @@ func TestUpdateCheckVersionFail(t *testing.T) {
 }
 
 func TestUpdateAlreadyUpToDate(t *testing.T) {
-	m := new(mockHttpClient)
+	m := new(mockHTTPClient)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
 		}, nil)
 	p := new(mockProvider)
@@ -237,10 +241,10 @@ func TestUpdateAlreadyUpToDate(t *testing.T) {
 }
 
 func TestUpdateDownloadFail(t *testing.T) {
-	m := new(mockHttpClient)
+	m := new(mockHTTPClient)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
 		}, nil)
 	p := new(mockProvider)
@@ -264,10 +268,10 @@ func TestUpdateDownloadFail(t *testing.T) {
 }
 
 func TestUpdateDecompressionFail(t *testing.T) {
-	m := new(mockHttpClient)
+	m := new(mockHTTPClient)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
 		}, nil)
 	p := new(mockProvider)
@@ -291,10 +295,10 @@ func TestUpdateDecompressionFail(t *testing.T) {
 }
 
 func TestUpdateChecksumFail(t *testing.T) {
-	m := new(mockHttpClient)
+	m := new(mockHTTPClient)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
 		}, nil)
 	p := new(mockProvider)
@@ -319,10 +323,10 @@ func TestUpdateChecksumFail(t *testing.T) {
 }
 
 func TestUpdateInstallationFail(t *testing.T) {
-	m := new(mockHttpClient)
+	m := new(mockHTTPClient)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
 		}, nil)
 	p := new(mockProvider)
@@ -348,10 +352,10 @@ func TestUpdateInstallationFail(t *testing.T) {
 }
 
 func TestUpdate(t *testing.T) {
-	m := new(mockHttpClient)
+	m := new(mockHTTPClient)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
 		}, nil)
 	p := new(mockProvider)

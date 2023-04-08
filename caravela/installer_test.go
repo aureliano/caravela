@@ -97,7 +97,7 @@ func TestInstall(t *testing.T) {
 }
 
 func TestHomeDirOsExecutableFail(t *testing.T) {
-	osExecutable = func() (string, error) { return "", fmt.Errorf("some error") }
+	_mpOsExecutable = func() (string, error) { return "", fmt.Errorf("some error") }
 	_, err := homeDir()
 
 	actual := err.Error()
@@ -107,7 +107,7 @@ func TestHomeDirOsExecutableFail(t *testing.T) {
 }
 
 func TestHomeDirUnknownPath(t *testing.T) {
-	osExecutable = func() (string, error) { return "/unknown/path", nil }
+	_mpOsExecutable = func() (string, error) { return "/unknown/path", nil }
 	_, err := homeDir()
 
 	actual := err.Error()
@@ -117,7 +117,7 @@ func TestHomeDirUnknownPath(t *testing.T) {
 }
 
 func TestHomeDir(t *testing.T) {
-	osExecutable = os.Executable
+	_mpOsExecutable = os.Executable
 	dir, err := homeDir()
 	if err != nil {
 		t.Fatal(err)

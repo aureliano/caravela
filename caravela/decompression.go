@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"archive/zip"
 	"compress/gzip"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -32,16 +33,20 @@ func unzip(src string) (int, error) {
 	dir := filepath.Dir(src)
 	counter := 0
 	for _, file := range r.File {
-		in, err := file.Open()
-		if err != nil {
-			return counter, err
+		in, e := file.Open()
+		if e != nil {
+			return counter, e
 		}
 		defer in.Close()
 
-		path := filepath.Join(dir, file.Name)
-		_, err = writeFile(path, in)
-		if err != nil {
-			return counter, err
+		if strings.Contains(dir, "..") || strings.Contains(file.Name, "..") {
+			return counter, fmt.Errorf("err")
+		}
+
+		path := filepath.Join(dir, filepath.Clean(file.Name))
+		_, e = writeFile(path, in)
+		if e != nil {
+			return counter, e
 		}
 
 		counter++
@@ -73,7 +78,7 @@ func untar(dir string, in io.Reader) (int, error) {
 	for {
 		header, err := tarReader.Next()
 
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		} else if err != nil {
 			return counter, err
@@ -84,13 +89,13 @@ func untar(dir string, in io.Reader) (int, error) {
 		switch header.Typeflag {
 		case tar.TypeDir:
 			{
-				if err := os.Mkdir(name, 0755); err != nil {
+				if err = os.Mkdir(name, 0755); err != nil {
 					return counter, err
 				}
 			}
 		case tar.TypeReg:
 			{
-				path := filepath.Join(dir, name)
+				path := filepath.Join(dir, filepath.Clean(name))
 				_, err = writeFile(path, tarReader)
 				if err != nil {
 					return counter, err

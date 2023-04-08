@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-const gitlabTimeout = time.Millisecond * 120
+const gitlabTimeout = time.Second * 120
 
 // GitlabProvider is a provider for getting releases from Gitlab.
 type GitlabProvider struct {

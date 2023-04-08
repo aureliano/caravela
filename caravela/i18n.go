@@ -3,8 +3,8 @@ package caravela
 import "fmt"
 
 const (
-	EN    = 0
-	PT_BR = 1
+	En   = 0
+	PtBr = 1
 )
 
 type I18nConf struct {
@@ -42,7 +42,7 @@ func prepareI18n(conf I18nConf) error {
 
 	config = conf
 
-	if conf.Locale == PT_BR {
+	if conf.Locale == PtBr {
 		msg = ptBrMessages
 	} else {
 		msg = enMessages
@@ -52,7 +52,7 @@ func prepareI18n(conf I18nConf) error {
 }
 
 func validateLocale(locale int) error {
-	if PT_BR != locale && EN != locale {
+	if PtBr != locale && En != locale {
 		return fmt.Errorf("invalid locale %d", locale)
 	}
 
