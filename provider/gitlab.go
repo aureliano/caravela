@@ -156,6 +156,7 @@ func validateProvider(p GitlabProvider) error {
 func initProvider(p *GitlabProvider) {
 	const httpPort = 80
 	const httpsPort = 443
+	const timeout = time.Second * 30
 
 	if p.Port == 0 {
 		if p.Ssl {
@@ -165,5 +166,9 @@ func initProvider(p *GitlabProvider) {
 		}
 	} else {
 		p.Ssl = p.Port == httpsPort
+	}
+
+	if p.Timeout == 0 {
+		p.Timeout = timeout
 	}
 }

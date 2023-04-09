@@ -367,3 +367,15 @@ func TestInitProviderHttps(t *testing.T) {
 	assert.Equal(t, uint(443), p.Port)
 	assert.True(t, p.Ssl)
 }
+
+func TestInitProviderTimeout(t *testing.T) {
+	p := GitlabProvider{Port: 8443, Ssl: true, Timeout: 0}
+	initProvider(&p)
+
+	assert.Equal(t, time.Second*30, p.Timeout)
+
+	p.Timeout = time.Second * 57
+	initProvider(&p)
+
+	assert.Equal(t, time.Second*57, p.Timeout)
+}
