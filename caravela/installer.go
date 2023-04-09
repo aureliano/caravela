@@ -32,7 +32,6 @@ func install(srcDir string) error {
 		src := filepath.Join(srcDir, file.Name())
 		dest := filepath.Join(dir, file.Name())
 
-		wmsg(300, src, dest)
 		err = installFile(dest, src)
 		if err != nil {
 			return err

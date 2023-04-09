@@ -14,8 +14,7 @@ type Conf struct {
 	ProcessName string
 	Version     string
 	Provider    pvdr.UpdaterProvider
-	I18nConf
-	HTTPClient *http.Client
+	HTTPClient  *http.Client
 }
 
 var mpDownloadTo = downloadTo
@@ -39,13 +38,6 @@ func CheckForUpdates(c Conf) (*pvdr.Release, error) {
 
 	client := pvdr.HTTPClientDecorator{Client: *c.HTTPClient}
 
-	err := prepareI18n(c.I18nConf)
-	if err != nil {
-		c.I18nConf = I18nConf{Verbose: false, Locale: En}
-		_ = prepareI18n(c.I18nConf)
-		fmt.Println("Use default I18n configuration.")
-	}
-
 	return mpCheckForUpdates(&client, c.Provider, c.Version)
 }
 
@@ -62,13 +54,6 @@ func Update(c Conf) (*pvdr.Release, error) {
 	}
 
 	client := pvdr.HTTPClientDecorator{Client: *c.HTTPClient}
-
-	err := prepareI18n(c.I18nConf)
-	if err != nil {
-		c.I18nConf = I18nConf{Verbose: false, Locale: En}
-		_ = prepareI18n(c.I18nConf)
-		fmt.Println("Use default I18n configuration.")
-	}
 
 	return mpUpdate(&client, c.Provider, c.ProcessName, c.Version)
 }
@@ -99,26 +84,18 @@ func update(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider, pname, 
 		return nil, err
 	}
 
-	wmsg(200)
-
-	wmsg(201, rel.Name)
-	fmt.Println(rel.Description)
-
 	dir := filepath.Join(os.TempDir(), pname)
 	_ = os.MkdirAll(dir, os.ModePerm)
-	wmsg(202, dir)
 
 	bin, checksums, err := mpDownloadTo(client, rel, dir)
 	if err != nil {
 		return nil, err
 	}
 
-	wmsg(203)
-	num, err := mpDecompress(bin)
+	_, err = mpDecompress(bin)
 	if err != nil {
 		return nil, err
 	}
-	wmsg(204, num, filepath.Base(bin))
 
 	err = mpChecksum(bin, checksums)
 	if err != nil {
@@ -130,7 +107,6 @@ func update(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider, pname, 
 		return nil, err
 	}
 
-	wmsg(205)
 	os.RemoveAll(dir)
 
 	return rel, nil

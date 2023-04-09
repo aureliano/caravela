@@ -27,7 +27,6 @@ func downloadTo(client provider.HTTPClientPlugin, release *provider.Release, dir
 
 	fileBin := filepath.Join(dir, fname)
 
-	wmsg(100)
 	err := mpDownloadFile(client, furl, fileBin)
 	if err != nil {
 		return "", "", err
@@ -39,7 +38,6 @@ func downloadTo(client provider.HTTPClientPlugin, release *provider.Release, dir
 		return "", "", fmt.Errorf("file %s not found", checksumsFileName)
 	}
 
-	wmsg(101)
 	err = mpDownloadFile(client, furl, fileChecksums)
 	if err != nil {
 		return "", "", err

@@ -62,7 +62,7 @@ func TestCheckForUpdatesI18nError(t *testing.T) {
 		return nil, fmt.Errorf("already on the edge")
 	}
 
-	r, err := CheckForUpdates(Conf{I18nConf: I18nConf{Verbose: false, Locale: -1}, Version: "0.1.0"})
+	r, err := CheckForUpdates(Conf{Version: "0.1.0"})
 	assert.Nil(t, r)
 	assert.Equal(t, "already on the edge", err.Error())
 }
@@ -73,8 +73,7 @@ func TestCheckForUpdates(t *testing.T) {
 		return nil, fmt.Errorf("already on the edge")
 	}
 
-	r, err := CheckForUpdates(Conf{I18nConf: I18nConf{Verbose: false, Locale: PtBr},
-		HTTPClient: http.DefaultClient, Version: "0.1.0"})
+	r, err := CheckForUpdates(Conf{HTTPClient: http.DefaultClient, Version: "0.1.0"})
 	assert.Nil(t, r)
 	assert.Equal(t, "already on the edge", err.Error())
 }
@@ -90,7 +89,7 @@ func TestUpdateI18nError(t *testing.T) {
 		return nil, fmt.Errorf("")
 	}
 
-	_, err := Update(Conf{I18nConf: I18nConf{Verbose: false, Locale: -1}, ProcessName: "oalienista", Version: "0.1.0"})
+	_, err := Update(Conf{ProcessName: "oalienista", Version: "0.1.0"})
 	assert.NotNil(t, err)
 }
 
