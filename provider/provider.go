@@ -14,17 +14,16 @@ func (decorator *HTTPClientDecorator) Do(req *http.Request) (*http.Response, err
 	return decorator.Client.Do(req)
 }
 
-// UpdaterProvider is the interface that all providers must implement.
-// It has the basic methods which any provider must have implemented,
-// that is expected on the core package.
+// It is the interface that every release provider should implement, as it has all the
+// expected method definitions for querying, caching and restoring cached release.
 type UpdaterProvider interface {
 	// FetchLastRelease queries provider for the last release of a project.
 	FetchLastRelease(client HTTPClientPlugin) (*Release, error)
 
-	// CacheRelease caches the release passed as parameter on file system.
+	// CacheRelease writes the release passed as parameter to the file system.
 	CacheRelease(release Release) error
 
 	// RestoreCacheRelease retores a cached release.
-	// It returns nil if any release wasn't cached yet.
+	// It returns nil if no release has been cached yet.
 	RestoreCacheRelease() (*Release, error)
 }

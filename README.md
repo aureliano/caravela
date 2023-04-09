@@ -5,9 +5,9 @@
 [![caravela release (latest SemVer)](https://img.shields.io/github/v/release/aureliano/caravela?sort=semver)](https://github.com/aureliano/caravela/releases)
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/aureliano/caravela)](https://pkg.go.dev/github.com/aureliano/caravela)
 
-Caravela is a Go library for updating programs.
+Caravela is a Go library to support program update automation.
 
-It is intended to, given a version number, query a [catalogue of releases](https://github.com/aureliano/caravela/releases) and notify about new version or even update the program.
+Some platforms, such as [GitHub](https://docs.github.com/en/rest/releases) and [GitLab](https://docs.gitlab.com/ee/api/releases), provide an API for querying and retrieving software versions. Indeed, this library queries this API to check for new versions and even updates the program.
 
 Currently, **caravela requires Go version 1.17 or greater**. Caravela tracks Go's version support policy. We do our best not to break older versions of Go if we don't have to, but due to tooling constraints, we don't always test older versions.
 

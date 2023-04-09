@@ -1,89 +1,41 @@
 /*
-Caravela is a Go library for updating programs.
-It is intended to, given a version number, query a catalogue of releases and notify about
-new version or even update the program.
+The updater package has the logic of the functions that are exported by this library.
+In short, calls made to functions exported to the client are delegated to this package.
+Indeed, you can even make direct calls to this package, but having to fill in all the input parameters.
 
 Usage:
 
-	import "github.com/aureliano/caravela"
+	import "github.com/aureliano/caravela/updater"
 
-# Check for updates
+# Find update
 
-Check for updates at Gitlab:
+Fetches the last release published.
+It returns the last release available or raises an error if the current version is already the last one.
 
-	release, err := caravela.CheckForUpdates(caravela.Conf{
-		Version: "0.1.0",
-		Provider: caravela.GitlabProvider{
+	release, err := updater.FindUpdate(
+		&provider.HTTPClientDecorator{Client: *http.DefaultClient},
+		provider.GitlabProvider{
 			Host:        "gitlab.com",
 			Ssl:         true,
 			ProjectPath: "gitlab-org/gitlab",
 		},
-	})
-
-	if err != nil {
-		fmt.Printf("Check for updates has failed! %s\n", err)
-	} else {
-		fmt.Printf("New version available %s\n%s\n", release.Name, release.Description)
-	}
+		"0.1.0",
+	)
 
 # Update
 
-Update a program taking release assets from Gitlab:
+Updates running program to the last available release.
+It returns the release used to update this program or raises an error if it's already the last version.
 
-	err := caravela.Update(caravela.Conf{
-		ProcessName: "oalienista",
-		Version:     "0.1.0",
-		Provider: caravela.GitlabProvider{
+	release, err := updater.UpdateRelease(
+		&provider.HTTPClientDecorator{Client: *http.DefaultClient},
+		provider.GitlabProvider{
 			Host:        "gitlab.com",
 			Ssl:         true,
 			ProjectPath: "gitlab-org/gitlab",
 		},
-	})
-
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	} else {
-		fmt.Println("New version installed!")
-	}
-
-# Put it all together:
-
-	release, err := caravela.CheckForUpdates(caravela.Conf{
-		Version: "0.1.0",
-		Provider: provider.GitlabProvider{
-			Host:        "gitlab.com",
-			Ssl:         true,
-			ProjectPath: "gitlab-org/gitlab",
-		},
-	})
-
-	if err != nil {
-		fmt.Printf("Check for updates has failed! %s\n", err)
-	} else {
-		fmt.Printf("[WARN] There is a new version available. Would you like to update this program?")
-
-		// ...
-		// Ask user whether to update or not.
-		// ...
-
-		if shouldUpdate {
-			err = caravela.Update(caravela.Conf{
-				ProcessName: "oalienista",
-				Version:     "0.1.0",
-				Provider: provider.GitlabProvider{
-					Host:        "gitlab.com",
-					Ssl:         true,
-					ProjectPath: "gitlab-org/gitlab",
-				},
-			})
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			} else {
-				fmt.Printf("New version %s was successfuly installed!\n", release.Name)
-			}
-		}
-	}
+		"oalienista",
+		"0.1.0",
+	)
 */
 package updater

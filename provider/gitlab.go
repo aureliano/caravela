@@ -32,7 +32,6 @@ type GitlabRelease struct {
 	} `json:"assets"`
 }
 
-// FetchLastRelease finds the last release found at Gitlab.
 func (provider GitlabProvider) FetchLastRelease(client HTTPClientPlugin) (*Release, error) {
 	initProvider(&provider)
 	err := validateProvider(provider)
@@ -57,13 +56,10 @@ func (provider GitlabProvider) FetchLastRelease(client HTTPClientPlugin) (*Relea
 	return lastRelease, nil
 }
 
-// CacheRelease caches the release passed as parameter on file system.
 func (GitlabProvider) CacheRelease(r Release) error {
 	return serializeRelease(&r)
 }
 
-// RestoreCacheRelease retores a cached release.
-// It returns nil if any release wasn't cached yet.
 func (GitlabProvider) RestoreCacheRelease() (*Release, error) {
 	return deserializeRelease()
 }

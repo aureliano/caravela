@@ -2,7 +2,7 @@ package provider
 
 import "time"
 
-// A Release is a basic structured data type that abstracts a project release.
+// Release is a structured data type that abstracts the release of a project.
 type Release struct {
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
@@ -13,13 +13,13 @@ type Release struct {
 	} `json:"assets"`
 }
 
-// Comparator is an interface which tells a type what to do to compare to releases.
+// Comparator is an interface that provides methods for comparing two releases.
 type Comparator interface {
 	CompareTo(r2 *Release) int
 }
 
 // CompareTo compares release r1 with release r2.
-// It returns 1 if it is greater, 0 if they're equal or -1 likewise.
+// It returns 1, 0 or -1 if it is greater, equal or lesser.
 func (r1 *Release) CompareTo(r2 *Release) int {
 	return compareVersions(r1.Name, r2.Name)
 }
