@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	err := caravela.Update(caravela.Conf{
+	release, err := caravela.Update(caravela.Conf{
 		ProcessName: "bruzundangas",
 		Version:     "0.1.0",
 		Provider: provider.GitlabProvider{
@@ -22,5 +22,6 @@ func main() {
 		fmt.Println(err)
 	} else {
 		fmt.Println("Process successfuly updated!")
+		fmt.Printf("%s: %s", release.Name, release.Description)
 	}
 }

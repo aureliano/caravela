@@ -50,10 +50,11 @@ func CheckForUpdates(c Conf) (*pvdr.Release, error) {
 }
 
 // Update running program to the last available release.
-// Raises an error if it's already the last version.
-func Update(c Conf) error {
+// Raises an error if it's already the last version
+// or returns the new release.
+func Update(c Conf) (*pvdr.Release, error) {
 	if c.ProcessName == "" {
-		return fmt.Errorf("process name is required")
+		return nil, fmt.Errorf("process name is required")
 	}
 
 	if c.HTTPClient == nil {
@@ -92,10 +93,10 @@ func checkForUpdates(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider
 	return nil, fmt.Errorf("already on the edge")
 }
 
-func update(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider, pname, currver string) error {
+func update(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider, pname, currver string) (*pvdr.Release, error) {
 	rel, err := checkForUpdates(client, provider, currver)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	wmsg(200)
@@ -109,28 +110,28 @@ func update(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider, pname, 
 
 	bin, checksums, err := mpDownloadTo(client, rel, dir)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	wmsg(203)
 	num, err := mpDecompress(bin)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	wmsg(204, num, filepath.Base(bin))
 
 	err = mpChecksum(bin, checksums)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = mpInstall(dir)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	wmsg(205)
 	os.RemoveAll(dir)
 
-	return nil
+	return rel, nil
 }

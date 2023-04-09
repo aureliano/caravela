@@ -1,5 +1,13 @@
 package caravela
 
+const (
+	DwnUpPkg = 100
+	DwnCksFl = 101
+	CvlCkLVe = 200
+
+	InsCpFil = 300
+)
+
 var ptBrMessages = map[int]string{
 	100: "Baixando pacote de atualização.",
 	101: "Baixando checksum.",
