@@ -10,7 +10,7 @@ import (
 )
 
 func TestCheckForUpdatesCurrentVersionIsRequired(t *testing.T) {
-	_, err := CheckForUpdates(Conf{})
+	_, err := CheckUpdates(Conf{})
 	assert.Equal(t, "current version is required", err.Error())
 }
 
@@ -20,7 +20,7 @@ func TestCheckForUpdatesHTTPClientIsNil(t *testing.T) {
 		return nil, fmt.Errorf("already on the edge")
 	}
 
-	r, err := CheckForUpdates(Conf{Version: "0.1.0"})
+	r, err := CheckUpdates(Conf{Version: "0.1.0"})
 	assert.Nil(t, r)
 	assert.Equal(t, "already on the edge", err.Error())
 }
@@ -31,7 +31,7 @@ func TestCheckForUpdates(t *testing.T) {
 		return nil, fmt.Errorf("already on the edge")
 	}
 
-	r, err := CheckForUpdates(Conf{HTTPClient: http.DefaultClient, Version: "0.1.0"})
+	r, err := CheckUpdates(Conf{HTTPClient: http.DefaultClient, Version: "0.1.0"})
 	assert.Nil(t, r)
 	assert.Equal(t, "already on the edge", err.Error())
 }

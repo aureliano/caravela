@@ -28,12 +28,12 @@ Or even add it as a project depency of your module:
 To update Caravela to the latest version, use `go get -u github.com/aureliano/caravela`.
 
 ## Usage
-You'll usually call `Update` after the given result of `CheckForUpdates`. The sample bellow show you how to notice the user about new release available and ask him about updating.
+You'll usually call `Update` after the given result of `CheckUpdates`. The sample bellow show you how to notice the user about new release available and ask him about updating.
 
 ```go
 // ...
 
-release, err := caravela.CheckForUpdates(caravela.Conf{
+release, err := caravela.CheckUpdates(caravela.Conf{
 	Version: "0.1.0",
 	Provider: provider.GitlabProvider{
 		Host:        "gitlab.com",
@@ -43,7 +43,7 @@ release, err := caravela.CheckForUpdates(caravela.Conf{
 })
 
 if err != nil {
-	fmt.Printf("Check for updates has failed! %s\n", err)
+	fmt.Printf("Check updates has failed! %s\n", err)
 } else {
 	fmt.Printf("[WARN] There is a new version available. Would you like to update this program?")
 
@@ -73,7 +73,7 @@ if err != nil {
 // ...
 ```
 ## Examples
-Some examples are in the examples module. There are some usage samples such as [checking for updates](./example/check_for_updates/main.go) and [update](./example/update/main.go).
+Some examples are in the examples module. There are some usage samples such as [check updates](./example/check_updates/main.go) and [update](./example/update/main.go).
 
 ## Contributing
 Please feel free to submit issues, fork the repository and send pull requests!
@@ -107,7 +107,7 @@ Finally, push the commits to your fork and submit a [pull request](https://help.
 **NOTE**: Please do not use force-push on PRs in this repo, as it makes it more difficult for reviewers to see what has changed since the last code review.
 
 ### Other notes on code organization
-Currently, all exposed features - check for updates and update - are defined in the main file at the base directory. Such features are delegated to providers according to where releases were published. That said, a Github provider must be a `provider/github.go` file as is `provider/gitlab.go` to Gitlab. So use that as your guide for where to put new providers.
+Currently, all exposed features - check updates and update - are defined in the main file at the base directory. Such features are delegated to providers according to where releases were published. That said, a Github provider must be a `provider/github.go` file as is `provider/gitlab.go` to Gitlab. So use that as your guide for where to put new providers.
 
 ### Maintainer's Guide
 **Always try to maintain a clean, linear git history**. With very few exceptions, running `git log` should not show a bunch of branching and merging.

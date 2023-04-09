@@ -19,10 +19,10 @@ type Conf struct {
 var mpCheckForUpdates = caravela.FindUpdate
 var mpUpdate = caravela.UpdateRelease
 
-// CheckForUpdates queries, given a provider, for new releases.
+// CheckUpdates queries, given a provider, for new releases.
 // It returns the last release available or nil if the current
 // version is already the last one.
-func CheckForUpdates(c Conf) (*pvdr.Release, error) {
+func CheckUpdates(c Conf) (*pvdr.Release, error) {
 	if c.Version == "" {
 		return nil, fmt.Errorf("current version is required")
 	}
