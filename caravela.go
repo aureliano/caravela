@@ -8,7 +8,7 @@ import (
 	pvdr "github.com/aureliano/caravela/provider"
 )
 
-// A Conf is a wrapper o data to be passed as input to the public functions.
+// A Conf is a wrapper of data to be passed as input to the public functions.
 type Conf struct {
 	ProcessName string
 	Version     string
@@ -19,9 +19,10 @@ type Conf struct {
 var mpCheckForUpdates = caravela.FindUpdate
 var mpUpdate = caravela.UpdateRelease
 
-// CheckUpdates queries, given a provider, for new releases.
-// It returns the last release available or nil if the current
-// version is already the last one.
+// CheckUpdates fetches the last release published.
+//
+// It returns the last release available or raises an error
+// if the current version is already the last one.
 func CheckUpdates(c Conf) (*pvdr.Release, error) {
 	if c.Version == "" {
 		return nil, fmt.Errorf("current version is required")
@@ -36,9 +37,10 @@ func CheckUpdates(c Conf) (*pvdr.Release, error) {
 	return mpCheckForUpdates(&client, c.Provider, c.Version)
 }
 
-// Update running program to the last available release.
-// Raises an error if it's already the last version
-// or returns the new release.
+// Update updates running program to the last available release.
+//
+// It returns the release used to update this program or raises
+// an error if it's already the last version.
 func Update(c Conf) (*pvdr.Release, error) {
 	if c.ProcessName == "" {
 		return nil, fmt.Errorf("process name is required")
