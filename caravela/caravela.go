@@ -3,8 +3,6 @@ package caravela
 import (
 	"fmt"
 	"net/http"
-	"os"
-	"path/filepath"
 
 	pvdr "github.com/aureliano/caravela/provider"
 )
@@ -17,12 +15,8 @@ type Conf struct {
 	HTTPClient  *http.Client
 }
 
-var mpDownloadTo = downloadTo
-var mpDecompress = decompress
-var mpChecksum = checksum
-var mpInstall = install
-var mpCheckForUpdates = checkForUpdates
-var mpUpdate = update
+var mpCheckForUpdates = FindUpdate
+var mpUpdate = UpdateRelease
 
 // CheckForUpdates queries, given a provider, for new releases.
 // It returns the last release available or nil if the current
@@ -56,58 +50,4 @@ func Update(c Conf) (*pvdr.Release, error) {
 	client := pvdr.HTTPClientDecorator{Client: *c.HTTPClient}
 
 	return mpUpdate(&client, c.Provider, c.ProcessName, c.Version)
-}
-
-func checkForUpdates(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider,
-	currver string) (*pvdr.Release, error) {
-	rel, err := provider.RestoreCacheRelease()
-
-	if err != nil {
-		rel, err = provider.FetchLastRelease(client)
-		if err != nil {
-			return nil, err
-		}
-
-		_ = provider.CacheRelease(*rel)
-	}
-
-	if rel.CompareTo(&pvdr.Release{Name: currver}) == 1 {
-		return rel, nil
-	}
-
-	return nil, fmt.Errorf("already on the edge")
-}
-
-func update(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider, pname, currver string) (*pvdr.Release, error) {
-	rel, err := checkForUpdates(client, provider, currver)
-	if err != nil {
-		return nil, err
-	}
-
-	dir := filepath.Join(os.TempDir(), pname)
-	_ = os.MkdirAll(dir, os.ModePerm)
-
-	bin, checksums, err := mpDownloadTo(client, rel, dir)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = mpDecompress(bin)
-	if err != nil {
-		return nil, err
-	}
-
-	err = mpChecksum(bin, checksums)
-	if err != nil {
-		return nil, err
-	}
-
-	err = mpInstall(dir)
-	if err != nil {
-		return nil, err
-	}
-
-	os.RemoveAll(dir)
-
-	return rel, nil
 }
