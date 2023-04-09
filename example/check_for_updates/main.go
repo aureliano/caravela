@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/aureliano/caravela/caravela"
+	"github.com/aureliano/caravela"
 	"github.com/aureliano/caravela/provider"
 )
 

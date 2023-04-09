@@ -8,10 +8,13 @@ import (
 
 // FindUpdate fetches the last release published.
 //
-// It returns the last release available or nil if the current
-// version is already the last one.
-func FindUpdate(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider,
-	currver string) (*pvdr.Release, error) {
+// It returns the last release available or raises an error
+// if the current version is already the last one.
+func FindUpdate(
+	client pvdr.HTTPClientPlugin,
+	provider pvdr.UpdaterProvider,
+	currver string,
+) (*pvdr.Release, error) {
 	rel, err := provider.RestoreCacheRelease()
 
 	if err != nil {

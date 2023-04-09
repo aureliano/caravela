@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/aureliano/caravela/caravela"
 	pvdr "github.com/aureliano/caravela/provider"
 )
 
@@ -15,8 +16,8 @@ type Conf struct {
 	HTTPClient  *http.Client
 }
 
-var mpCheckForUpdates = FindUpdate
-var mpUpdate = UpdateRelease
+var mpCheckForUpdates = caravela.FindUpdate
+var mpUpdate = caravela.UpdateRelease
 
 // CheckForUpdates queries, given a provider, for new releases.
 // It returns the last release available or nil if the current

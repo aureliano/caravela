@@ -12,6 +12,10 @@ var mpDecompress = decompress
 var mpChecksum = checksum
 var mpInstall = install
 
+// Update updates running program to the last available release.
+//
+// It returns the release used to update this program or raises
+// an error if it's already the last version.
 func UpdateRelease(
 	client pvdr.HTTPClientPlugin,
 	provider pvdr.UpdaterProvider,
