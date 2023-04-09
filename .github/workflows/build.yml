@@ -24,12 +24,6 @@ jobs:
         go-version: ${{ matrix.go-version }}
         cache: false
 
-    - name: Check code format
-      run: test -z "$(gofmt -l ./)"
-
-    - name: Check code lint
-      run: make code-lint
-
     - name: Golang CI - Lint
       uses: golangci/golangci-lint-action@v3
       with:

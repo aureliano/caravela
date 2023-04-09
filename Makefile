@@ -14,4 +14,4 @@ test:
 
 .PHONY: code-lint
 code-lint:
-	go vet -json ./...
+	golangci-lint run
