@@ -86,4 +86,4 @@ Update a program taking release assets from Gitlab:
 		}
 	}
 */
-package caravela
+package updater

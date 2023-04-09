@@ -1,4 +1,4 @@
-package caravela
+package updater
 
 import (
 	"archive/tar"

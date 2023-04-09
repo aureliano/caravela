@@ -1,4 +1,4 @@
-package caravela
+package updater
 
 import (
 	"crypto/sha256"

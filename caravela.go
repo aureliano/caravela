@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/aureliano/caravela/caravela"
 	pvdr "github.com/aureliano/caravela/provider"
+	caravela "github.com/aureliano/caravela/updater"
 )
 
 // A Conf is a wrapper of data to be passed as input to the public functions.
