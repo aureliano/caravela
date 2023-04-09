@@ -9,14 +9,13 @@ import (
 	"time"
 )
 
-const gitlabTimeout = time.Second * 120
-
 // GitlabProvider is a provider for getting releases from Gitlab.
 type GitlabProvider struct {
 	Host        string
 	Port        uint
 	Ssl         bool
 	ProjectPath string
+	Timeout     time.Duration
 }
 
 // GitlabRelease is a representation - in JSON form - of what Gitlab
@@ -75,7 +74,7 @@ func (r1 *GitlabRelease) CompareTo(r2 *GitlabRelease) int {
 
 func fetchReleases(p GitlabProvider, client HTTPClientPlugin) ([]*Release, error) {
 	srvURL := buildServiceURL(p)
-	ctx, cancel := context.WithTimeout(context.Background(), gitlabTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), p.Timeout)
 	defer cancel()
 
 	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, srvURL, nil)
