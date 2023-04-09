@@ -85,7 +85,8 @@ func TestUpdateProcessNameIsRequired(t *testing.T) {
 }
 
 func TestUpdateI18nError(t *testing.T) {
-	mpUpdate = func(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider, pname, currver string) (*pvdr.Release, error) {
+	mpUpdate = func(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider,
+		pname, currver string) (*pvdr.Release, error) {
 		return nil, fmt.Errorf("")
 	}
 
