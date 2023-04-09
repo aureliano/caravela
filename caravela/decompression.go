@@ -13,11 +13,12 @@ import (
 )
 
 func decompress(src string) (int, error) {
-	if strings.HasSuffix(src, ".zip") {
+	switch {
+	case strings.HasSuffix(src, ".zip"):
 		return unzip(src)
-	} else if strings.HasSuffix(src, ".tar.gz") || strings.HasSuffix(src, ".tgz") {
+	case strings.HasSuffix(src, ".tar.gz") || strings.HasSuffix(src, ".tgz"):
 		return ungzip(src)
-	} else {
+	default:
 		ext := filepath.Ext(src)
 		return 0, fmt.Errorf("%s not supported for decompression", ext)
 	}

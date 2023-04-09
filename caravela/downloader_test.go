@@ -24,7 +24,7 @@ func (plugin *mockHTTPPlugin) Do(req *http.Request) (*http.Response, error) {
 	args := plugin.Called(req)
 	var res *http.Response
 	if args.Get(0) != nil {
-		res = args.Get(0).(*http.Response)
+		res, _ = args.Get(0).(*http.Response)
 	}
 
 	return res, args.Error(1)

@@ -15,6 +15,7 @@ import (
 )
 
 const downloadTimeout = time.Second * 120
+const checksumsFileName = "checksums.txt"
 
 var mpDownloadFile = downloadFile
 
@@ -32,11 +33,10 @@ func downloadTo(client provider.HTTPClientPlugin, release *provider.Release, dir
 		return "", "", err
 	}
 
-	fname = "checksums.txt"
 	furl = findChecksumsFileURL(release)
-	fileChecksums := filepath.Join(dir, fname)
+	fileChecksums := filepath.Join(dir, checksumsFileName)
 	if furl == "" {
-		return "", "", fmt.Errorf("file %s not found", fname)
+		return "", "", fmt.Errorf("file %s not found", checksumsFileName)
 	}
 
 	wmsg(101)
@@ -91,7 +91,7 @@ func findReleaseFileURL(osys string, release *provider.Release) (string, string)
 
 func findChecksumsFileURL(release *provider.Release) string {
 	for _, asset := range release.Assets {
-		if asset.Name == "checksums.txt" {
+		if asset.Name == checksumsFileName {
 			return asset.URL
 		}
 	}

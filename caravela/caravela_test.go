@@ -30,7 +30,7 @@ func (provider *mockProvider) FetchLastRelease(client pvdr.HTTPClientPlugin) (*p
 	args := provider.Called(client)
 	var rel *pvdr.Release
 	if args.Get(0) != nil {
-		rel = args.Get(0).(*pvdr.Release)
+		rel, _ = args.Get(0).(*pvdr.Release)
 	}
 
 	return rel, args.Error(1)
@@ -45,7 +45,7 @@ func (provider *mockProvider) RestoreCacheRelease() (*pvdr.Release, error) {
 	args := provider.Called()
 	var rel *pvdr.Release
 	if args.Get(0) != nil {
-		rel = args.Get(0).(*pvdr.Release)
+		rel, _ = args.Get(0).(*pvdr.Release)
 	}
 
 	return rel, args.Error(1)
