@@ -61,7 +61,7 @@ func TestCheckForUpdatesRestoreCacheCurrentVersionIsOlder(t *testing.T) {
 	p := new(mockProviderFindUpdate)
 	p.On("RestoreCacheRelease").Return(&pvdr.Release{Name: "v0.1.0"}, nil)
 
-	r, _ := FindUpdate(m, p, "v0.1.0-alpha")
+	r, _ := FindUpdate(m, p, "v0.1.0-alpha", false)
 	assert.Equal(t, r.Name, "v0.1.0")
 	p.AssertCalled(t, "RestoreCacheRelease")
 }
@@ -76,7 +76,7 @@ func TestCheckForUpdatesRestoreCacheCurrentVersionOnTheEdge(t *testing.T) {
 	p := new(mockProviderFindUpdate)
 	p.On("RestoreCacheRelease").Return(&pvdr.Release{Name: "v0.1.0"}, nil)
 
-	r, _ := FindUpdate(m, p, "v0.1.0")
+	r, _ := FindUpdate(m, p, "v0.1.0", false)
 	assert.Nil(t, r)
 	p.AssertCalled(t, "RestoreCacheRelease")
 }
@@ -95,7 +95,7 @@ func TestCheckForUpdatesNoCacheFetchLastReleaseError(t *testing.T) {
 		nil, fmt.Errorf("some error"),
 	)
 
-	r, e := FindUpdate(m, p, "v0.1.2")
+	r, e := FindUpdate(m, p, "v0.1.2", false)
 	assert.Nil(t, r)
 	assert.Equal(t, "some error", e.Error())
 	p.AssertCalled(t, "FetchLastRelease", m)
@@ -118,7 +118,7 @@ func TestCheckForUpdatesNoCacheCurrentVersionIsOlder(t *testing.T) {
 		}, nil,
 	)
 
-	r, _ := FindUpdate(m, p, "v0.1.1")
+	r, _ := FindUpdate(m, p, "v0.1.1", false)
 	assert.Equal(t, r.Name, "v0.1.2")
 	p.AssertCalled(t, "FetchLastRelease", m)
 	p.AssertCalled(t, "CacheRelease", pvdr.Release{Name: "v0.1.2"})
@@ -141,9 +141,46 @@ func TestCheckForUpdatesNoCacheCurrentVersionOnTheEdge(t *testing.T) {
 		}, nil,
 	)
 
-	r, _ := FindUpdate(m, p, "v0.1.2")
+	r, _ := FindUpdate(m, p, "v0.1.2", false)
 	assert.Nil(t, r)
 	p.AssertCalled(t, "FetchLastRelease", m)
 	p.AssertCalled(t, "CacheRelease", pvdr.Release{Name: "v0.1.2"})
 	p.AssertCalled(t, "RestoreCacheRelease")
+}
+
+func TestCheckForUpdatesIgnoreCache(t *testing.T) {
+	m := new(mockHTTPClientFindUpdate)
+	m.On("Do", mock.Anything).Return(
+		&http.Response{
+			StatusCode: http.StatusOK,
+			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
+		}, nil)
+	p := new(mockProviderFindUpdate)
+	p.On("FetchLastRelease", m).Return(
+		&pvdr.Release{
+			Name: "v0.1.3",
+		}, nil,
+	)
+
+	r, _ := FindUpdate(m, p, "v0.1.2", true)
+	assert.Equal(t, r.Name, "v0.1.3")
+	p.AssertCalled(t, "FetchLastRelease", m)
+}
+
+func TestCheckForUpdatesIgnoreCacheError(t *testing.T) {
+	m := new(mockHTTPClientFindUpdate)
+	m.On("Do", mock.Anything).Return(
+		&http.Response{
+			StatusCode: http.StatusOK,
+			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
+		}, nil)
+	p := new(mockProviderFindUpdate)
+	p.On("FetchLastRelease", m).Return(
+		nil, fmt.Errorf("some error"),
+	)
+
+	r, e := FindUpdate(m, p, "v0.1.2", true)
+	assert.Nil(t, r)
+	assert.Equal(t, "some error", e.Error())
+	p.AssertCalled(t, "FetchLastRelease", m)
 }

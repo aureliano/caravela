@@ -11,6 +11,7 @@ func main() {
 	release, err := caravela.Update(caravela.Conf{
 		ProcessName: "bruzundangas",
 		Version:     "0.1.0",
+		IgnoreCache: true,
 		Provider: provider.GithubProvider{
 			Host:        "api.github.com",
 			Ssl:         true,

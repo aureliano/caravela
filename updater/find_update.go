@@ -14,21 +14,39 @@ func FindUpdate(
 	client pvdr.HTTPClientPlugin,
 	provider pvdr.UpdaterProvider,
 	currver string,
+	ignoreCache bool,
 ) (*pvdr.Release, error) {
-	rel, err := provider.RestoreCacheRelease()
+	var release *pvdr.Release
+	var err error
+
+	if ignoreCache {
+		release, err = provider.FetchLastRelease(client)
+	} else {
+		release, err = findUpdateUseCache(client, provider)
+	}
 
 	if err != nil {
-		rel, err = provider.FetchLastRelease(client)
+		return nil, err
+	}
+
+	if release.CompareTo(&pvdr.Release{Name: currver}) == 1 {
+		return release, nil
+	}
+
+	return nil, fmt.Errorf("already on the edge")
+}
+
+func findUpdateUseCache(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider) (*pvdr.Release, error) {
+	release, err := provider.RestoreCacheRelease()
+
+	if err != nil {
+		release, err = provider.FetchLastRelease(client)
 		if err != nil {
 			return nil, err
 		}
 
-		_ = provider.CacheRelease(*rel)
+		_ = provider.CacheRelease(*release)
 	}
 
-	if rel.CompareTo(&pvdr.Release{Name: currver}) == 1 {
-		return rel, nil
-	}
-
-	return nil, fmt.Errorf("already on the edge")
+	return release, nil
 }

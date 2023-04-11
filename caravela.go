@@ -14,6 +14,7 @@ type Conf struct {
 	Version     string
 	Provider    pvdr.UpdaterProvider
 	HTTPClient  *http.Client
+	IgnoreCache bool
 }
 
 var mpCheckForUpdates = caravela.FindUpdate
@@ -34,7 +35,7 @@ func CheckUpdates(c Conf) (*pvdr.Release, error) {
 
 	client := pvdr.HTTPClientDecorator{Client: *c.HTTPClient}
 
-	return mpCheckForUpdates(&client, c.Provider, c.Version)
+	return mpCheckForUpdates(&client, c.Provider, c.Version, c.IgnoreCache)
 }
 
 // Update updates running program to the last available release.
@@ -52,5 +53,5 @@ func Update(c Conf) (*pvdr.Release, error) {
 
 	client := pvdr.HTTPClientDecorator{Client: *c.HTTPClient}
 
-	return mpUpdate(&client, c.Provider, c.ProcessName, c.Version)
+	return mpUpdate(&client, c.Provider, c.ProcessName, c.Version, c.IgnoreCache)
 }

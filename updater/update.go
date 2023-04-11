@@ -21,8 +21,9 @@ func UpdateRelease(
 	provider pvdr.UpdaterProvider,
 	pname,
 	currver string,
+	ignoreCache bool,
 ) (*pvdr.Release, error) {
-	rel, err := FindUpdate(client, provider, currver)
+	rel, err := FindUpdate(client, provider, currver, ignoreCache)
 	if err != nil {
 		return nil, err
 	}

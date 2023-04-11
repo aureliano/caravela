@@ -16,7 +16,7 @@ func TestCheckForUpdatesCurrentVersionIsRequired(t *testing.T) {
 
 func TestCheckForUpdatesHTTPClientIsNil(t *testing.T) {
 	mpCheckForUpdates = func(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider,
-		currver string) (*pvdr.Release, error) {
+		currver string, ignoreCache bool) (*pvdr.Release, error) {
 		return nil, fmt.Errorf("already on the edge")
 	}
 
@@ -27,7 +27,7 @@ func TestCheckForUpdatesHTTPClientIsNil(t *testing.T) {
 
 func TestCheckForUpdates(t *testing.T) {
 	mpCheckForUpdates = func(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider,
-		currver string) (*pvdr.Release, error) {
+		currver string, ignoreCache bool) (*pvdr.Release, error) {
 		return nil, fmt.Errorf("already on the edge")
 	}
 
@@ -43,7 +43,7 @@ func TestUpdateProcessNameIsRequired(t *testing.T) {
 
 func TestUpdateHTTPClientIsNil(t *testing.T) {
 	mpUpdate = func(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider,
-		pname, currver string) (*pvdr.Release, error) {
+		pname, currver string, ignoreCache bool) (*pvdr.Release, error) {
 		return nil, fmt.Errorf("")
 	}
 

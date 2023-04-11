@@ -65,7 +65,7 @@ func TestUpdateCheckVersionFail(t *testing.T) {
 	p.On("CacheRelease", pvdr.Release{}).Return(nil)
 	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("any error"))
 
-	_, err := UpdateRelease(m, p, "14-bis", "0.0.1")
+	_, err := UpdateRelease(m, p, "14-bis", "0.0.1", false)
 	actual := err.Error()
 	expected := "any error"
 
@@ -91,7 +91,7 @@ func TestUpdateAlreadyUpToDate(t *testing.T) {
 	p.On("CacheRelease", pvdr.Release{Name: "v0.1.2"}).Return(nil)
 	p.On("RestoreCacheRelease").Return(nil, fmt.Errorf("no file error"))
 
-	_, err := UpdateRelease(m, p, "14-bis", "0.1.2")
+	_, err := UpdateRelease(m, p, "14-bis", "0.1.2", false)
 	actual := err.Error()
 	expected := "already on the edge"
 
@@ -120,7 +120,7 @@ func TestUpdateDownloadFail(t *testing.T) {
 		return "", "", fmt.Errorf("download release error")
 	}
 
-	_, err := UpdateRelease(m, p, "14-bis", "0.1.1")
+	_, err := UpdateRelease(m, p, "14-bis", "0.1.1", false)
 
 	p.AssertNotCalled(t, "FetchLastRelease")
 	p.AssertNotCalled(t, "CacheRelease")
@@ -147,7 +147,7 @@ func TestUpdateDecompressionFail(t *testing.T) {
 		return "", "", nil
 	}
 	mpDecompress = func(src string) (int, error) { return 0, fmt.Errorf("decompression error") }
-	_, err := UpdateRelease(m, p, "14-bis", "0.1.1")
+	_, err := UpdateRelease(m, p, "14-bis", "0.1.1", false)
 
 	p.AssertNotCalled(t, "FetchLastRelease")
 	p.AssertNotCalled(t, "CacheRelease")
@@ -175,7 +175,7 @@ func TestUpdateChecksumFail(t *testing.T) {
 	}
 	mpDecompress = func(src string) (int, error) { return 1, nil }
 	mpChecksum = func(binPath, checksumsPath string) error { return fmt.Errorf("checksum error") }
-	_, err := UpdateRelease(m, p, "14-bis", "0.1.1")
+	_, err := UpdateRelease(m, p, "14-bis", "0.1.1", false)
 
 	p.AssertNotCalled(t, "FetchLastRelease")
 	p.AssertNotCalled(t, "CacheRelease")
@@ -204,7 +204,7 @@ func TestUpdateInstallationFail(t *testing.T) {
 	mpDecompress = func(src string) (int, error) { return 1, nil }
 	mpChecksum = func(binPath, checksumsPath string) error { return nil }
 	mpInstall = func(srcDir string) error { return fmt.Errorf("installation error") }
-	_, err := UpdateRelease(m, p, "14-bis", "0.1.1")
+	_, err := UpdateRelease(m, p, "14-bis", "0.1.1", false)
 
 	p.AssertNotCalled(t, "FetchLastRelease")
 	p.AssertNotCalled(t, "CacheRelease")
@@ -233,7 +233,7 @@ func TestUpdate(t *testing.T) {
 	mpDecompress = func(src string) (int, error) { return 1, nil }
 	mpChecksum = func(binPath, checksumsPath string) error { return nil }
 	mpInstall = func(srcDir string) error { return nil }
-	_, err := UpdateRelease(m, p, "14-bis", "0.1.1")
+	_, err := UpdateRelease(m, p, "14-bis", "0.1.1", false)
 
 	p.AssertNotCalled(t, "FetchLastRelease")
 	p.AssertNotCalled(t, "CacheRelease")
