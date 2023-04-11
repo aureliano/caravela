@@ -33,13 +33,15 @@ You'll usually call `Update` after the given result of `CheckUpdates`. The sampl
 ```go
 // ...
 
+prov := provider.GithubProvider{
+	Host:        "api.github.com",
+	Ssl:         true,
+	ProjectPath: "aureliano/caravela",
+}
+
 release, err := caravela.CheckUpdates(caravela.Conf{
 	Version: "0.1.0",
-	Provider: provider.GitlabProvider{
-		Host:        "gitlab.com",
-		Ssl:         true,
-		ProjectPath: "gitlab-org/gitlab",
-	},
+	Provider: prov,
 })
 
 if err != nil {
@@ -53,14 +55,11 @@ if err != nil {
 
 	if shouldUpdate {
 		err = caravela.Update(caravela.Conf{
-			ProcessName: "oalienista",
+			ProcessName: "caravela",
 			Version:     "0.1.0",
-			Provider: provider.GitlabProvider{
-				Host:        "gitlab.com",
-				Ssl:         true,
-				ProjectPath: "gitlab-org/gitlab",
-			},
+			Provider: prov,
 		})
+
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -73,7 +72,7 @@ if err != nil {
 // ...
 ```
 ## Examples
-Some examples are in the examples module. There are some usage samples such as [check updates](./example/check_updates/main.go) and [update](./example/update/main.go).
+Some examples are in the examples module. There are some usage samples such as [check updates](./example/check_updates/github/main.go) and [update](./example/update/github/main.go.
 
 ## Contributing
 Please feel free to submit issues, fork the repository and send pull requests!

@@ -19,6 +19,29 @@ Thus, for GitHub and GitLab systems, we will have github.go and gitlab.go files,
 		RestoreCacheRelease() (*Release, error)
 	}
 
+# GitHub provider implementation
+
+	// GithubProvider is a provider for getting releases from Github.
+	type GitlabProvider struct {
+		Host        string
+		Port        uint
+		Ssl         bool
+		ProjectPath string
+		Timeout     time.Duration
+	}
+
+	func (provider GithubProvider) FetchLastRelease(client HTTPClientPlugin) (*Release, error) {
+		// ...
+	}
+
+	func (GithubProvider) CacheRelease(r Release) error {
+		return serializeRelease(&r)
+	}
+
+	func (GithubProvider) RestoreCacheRelease() (*Release, error) {
+		return deserializeRelease()
+	}
+
 # GitLab provider implementation
 
 	// GitlabProvider is a provider for getting releases from Gitlab.
