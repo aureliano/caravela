@@ -5,9 +5,9 @@
 [![caravela release (latest SemVer)](https://img.shields.io/github/v/release/aureliano/caravela?sort=semver)](https://github.com/aureliano/caravela/releases)
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/aureliano/caravela)](https://pkg.go.dev/github.com/aureliano/caravela)
 
-Caravela is a Go library to support program update automation.
+Caravela is a Go library to support program update automation. Especially those built and released with [goreleaser](https://goreleaser.com).
 
-Some platforms, such as [GitHub](https://docs.github.com/en/rest/releases) and [GitLab](https://docs.gitlab.com/ee/api/releases), provide an API for querying and retrieving software versions. Indeed, this library queries this API to check for new versions and even updates the program.
+Some platforms, such as [GitHub](https://docs.github.com/en/rest/releases) and [GitLab](https://docs.gitlab.com/ee/api/releases), provide an API for querying and retrieving software versions. Indeed, this library queries those API to check for new versions and even updates the program.
 
 Currently, **caravela requires Go version 1.17 or greater**. Caravela tracks Go's version support policy. We do our best not to break older versions of Go if we don't have to, but due to tooling constraints, we don't always test older versions.
 
@@ -16,7 +16,7 @@ To install Caravela, use `go get`:
 
 `go get github.com/aureliano/caravela`
 
-Or you can install specific version like:
+Or you can install specific version as:
 
 `go get github.com/aureliano/caravela/v0`
 
@@ -28,7 +28,9 @@ Or even add it as a project depency of your module:
 To update Caravela to the latest version, use `go get -u github.com/aureliano/caravela`.
 
 ## Usage
-You'll usually call `Update` after the given result of `CheckUpdates`. The sample bellow show you how to notice the user about new release available and ask him about updating.
+The most common application of this library would be to chain checking for updates with updating.
+
+The example below shows how you do this by notifying the user if an update is available. Then the user is asked if he wants to update the program. And the program is updated as confirmed by the user.
 
 ```go
 // ...
@@ -72,7 +74,7 @@ if err != nil {
 // ...
 ```
 ## Examples
-Some examples are in the examples module. There are some usage samples such as [check updates](./example/check_updates/github/main.go) and [update](./example/update/github/main.go).
+Some examples are in the `example` module. There are some usage samples such as [check updates](./example/check_updates/github/main.go) and [update](./example/update/github/main.go).
 
 ## Contributing
 Please feel free to submit issues, fork the repository and send pull requests!
