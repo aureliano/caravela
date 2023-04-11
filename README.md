@@ -72,7 +72,7 @@ if err != nil {
 // ...
 ```
 ## Examples
-Some examples are in the examples module. There are some usage samples such as [check updates](./example/check_updates/github/main.go) and [update](./example/update/github/main.go.
+Some examples are in the examples module. There are some usage samples such as [check updates](./example/check_updates/github/main.go) and [update](./example/update/github/main.go).
 
 ## Contributing
 Please feel free to submit issues, fork the repository and send pull requests!
