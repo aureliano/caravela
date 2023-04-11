@@ -5,12 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
 	"time"
 )
 
-// GitlabProvider is a provider for getting releases from Gitlab.
-type GitlabProvider struct {
+// GithubProvider is a provider for getting releases from Github.
+type GithubProvider struct {
 	Host        string
 	Port        uint
 	Ssl         bool
@@ -18,28 +17,26 @@ type GitlabProvider struct {
 	Timeout     time.Duration
 }
 
-// GitlabRelease is a representation - in JSON form - of what Gitlab
+// GithubRelease is a representation - in JSON form - of what Github
 // returns when the target service is called.
-type GitlabRelease struct {
+type GithubRelease struct {
 	Name        string    `json:"tag_name"`
-	Description string    `json:"description"`
-	ReleaseAt   time.Time `json:"released_at"`
-	Assets      struct {
-		Links []struct {
-			Name string `json:"name"`
-			URL  string `json:"url"`
-		} `json:"links"`
+	Body        string    `json:"body"`
+	PublishedAt time.Time `json:"published_at"`
+	Assets      []struct {
+		Name string `json:"name"`
+		URL  string `json:"browser_download_url"`
 	} `json:"assets"`
 }
 
-func (provider GitlabProvider) FetchLastRelease(client HTTPClientPlugin) (*Release, error) {
-	initGitlabProvider(&provider)
-	err := validateGitlabProvider(provider)
+func (provider GithubProvider) FetchLastRelease(client HTTPClientPlugin) (*Release, error) {
+	initGithubProvider(&provider)
+	err := validateGithubProvider(provider)
 	if err != nil {
 		return nil, err
 	}
 
-	releases, err := fetchGitlabReleases(provider, client)
+	releases, err := fetchGithubReleases(provider, client)
 	if err != nil {
 		return nil, err
 	}
@@ -56,20 +53,20 @@ func (provider GitlabProvider) FetchLastRelease(client HTTPClientPlugin) (*Relea
 	return lastRelease, nil
 }
 
-func (GitlabProvider) CacheRelease(r Release) error {
+func (GithubProvider) CacheRelease(r Release) error {
 	return serializeRelease(&r)
 }
 
-func (GitlabProvider) RestoreCacheRelease() (*Release, error) {
+func (GithubProvider) RestoreCacheRelease() (*Release, error) {
 	return deserializeRelease()
 }
 
-func (r1 *GitlabRelease) CompareTo(r2 *GitlabRelease) int {
+func (r1 *GithubRelease) CompareTo(r2 *GithubRelease) int {
 	return compareVersions(r1.Name, r2.Name)
 }
 
-func fetchGitlabReleases(p GitlabProvider, client HTTPClientPlugin) ([]*Release, error) {
-	srvURL := buildGitlabServiceURL(p)
+func fetchGithubReleases(p GithubProvider, client HTTPClientPlugin) ([]*Release, error) {
+	srvURL := buildGithubServiceURL(p)
 	ctx, cancel := context.WithTimeout(context.Background(), p.Timeout)
 	defer cancel()
 
@@ -82,51 +79,50 @@ func fetchGitlabReleases(p GitlabProvider, client HTTPClientPlugin) ([]*Release,
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("gitlab integration error: %d", resp.StatusCode)
+		return nil, fmt.Errorf("github integration error: %d", resp.StatusCode)
 	}
 
-	var releases []*GitlabRelease
+	var releases []*GithubRelease
 	err = json.NewDecoder(resp.Body).Decode(&releases)
 
-	return convertGitlabReleases(releases), err
+	return convertGithubReleases(releases), err
 }
 
-func buildGitlabServiceURL(p GitlabProvider) string {
-	projectPath := url.QueryEscape(p.ProjectPath)
+func buildGithubServiceURL(p GithubProvider) string {
 	protocol := "http"
 	if p.Ssl {
 		protocol += "s"
 	}
-	baseURL := fmt.Sprintf("%s://%s:%d/api/v4/projects", protocol, p.Host, p.Port)
+	baseURL := fmt.Sprintf("%s://%s:%d/repos", protocol, p.Host, p.Port)
 
-	return fmt.Sprintf("%s/%s/releases", baseURL, projectPath)
+	return fmt.Sprintf("%s/%s/releases", baseURL, p.ProjectPath)
 }
 
-func convertGitlabReleases(in []*GitlabRelease) []*Release {
+func convertGithubReleases(in []*GithubRelease) []*Release {
 	size := len(in)
 	rels := make([]*Release, size)
 
 	for i, r := range in {
-		rels[i] = convertGitlabToBase(r)
+		rels[i] = convertGithubToBase(r)
 	}
 
 	return rels
 }
 
-func convertGitlabToBase(r *GitlabRelease) *Release {
+func convertGithubToBase(r *GithubRelease) *Release {
 	t := Release{
 		Name:        r.Name,
-		Description: r.Description,
-		ReleasedAt:  r.ReleaseAt,
+		Description: r.Body,
+		ReleasedAt:  r.PublishedAt,
 	}
 
-	size := len(r.Assets.Links)
+	size := len(r.Assets)
 	t.Assets = make([]struct {
 		Name string `json:"name"`
 		URL  string `json:"url"`
 	}, size)
 
-	for i, link := range r.Assets.Links {
+	for i, link := range r.Assets {
 		t.Assets[i] = struct {
 			Name string `json:"name"`
 			URL  string `json:"url"`
@@ -136,7 +132,7 @@ func convertGitlabToBase(r *GitlabRelease) *Release {
 	return &t
 }
 
-func validateGitlabProvider(p GitlabProvider) error {
+func validateGithubProvider(p GithubProvider) error {
 	switch {
 	case p.Host == "":
 		return fmt.Errorf("host is required")
@@ -149,7 +145,7 @@ func validateGitlabProvider(p GitlabProvider) error {
 	}
 }
 
-func initGitlabProvider(p *GitlabProvider) {
+func initGithubProvider(p *GithubProvider) {
 	const httpPort = 80
 	const httpsPort = 443
 	const timeout = time.Second * 30

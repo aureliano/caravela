@@ -15,22 +15,22 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type mockDecorator struct{ mock.Mock }
+type mockGithubDecorator struct{ mock.Mock }
 
-func (decorator *mockDecorator) Do(req *http.Request) (*http.Response, error) {
+func (decorator *mockGithubDecorator) Do(req *http.Request) (*http.Response, error) {
 	args := decorator.Called(req)
 	return args.Get(0).(*http.Response), args.Error(1)
 }
 
-func TestGitlabFetchLastReleaseValidationError(t *testing.T) {
+func TestGithubFetchLastReleaseValidationError(t *testing.T) {
 	m := new(mockDecorator)
-	p := GitlabProvider{}
+	p := GithubProvider{}
 
 	_, err := p.FetchLastRelease(m)
 	assert.Equal(t, "host is required", err.Error())
 }
 
-func TestGitlabFetchLastReleaseErrorOnFetchReleases(t *testing.T) {
+func TestGithubFetchLastReleaseErrorOnFetchReleases(t *testing.T) {
 	m := new(mockDecorator)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
@@ -38,13 +38,13 @@ func TestGitlabFetchLastReleaseErrorOnFetchReleases(t *testing.T) {
 			Body:       io.NopCloser(bytes.NewReader([]byte(``))),
 		}, nil)
 
-	provider := GitlabProvider{Host: "gitlab.com", Port: 80, ProjectPath: "massis/oalienista"}
+	provider := GithubProvider{Host: "github.com", Port: 80, ProjectPath: "massis/oalienista"}
 	_, err := provider.FetchLastRelease(m)
 	m.AssertCalled(t, "Do", mock.Anything)
-	assert.Equal(t, err.Error(), "gitlab integration error: 500")
+	assert.Equal(t, err.Error(), "github integration error: 500")
 }
 
-func TestGitlabFetchLastRelease(t *testing.T) {
+func TestGithubFetchLastRelease(t *testing.T) {
 	m := new(mockDecorator)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
@@ -53,14 +53,14 @@ func TestGitlabFetchLastRelease(t *testing.T) {
 				[]byte(`[{"tag_name":"v0.1.0"},{"tag_name":"v0.1.1"},{"tag_name":"v0.1.2"}]`))),
 		}, nil)
 
-	provider := GitlabProvider{Host: "gitlab.com", Port: 80, ProjectPath: "massis/oalienista"}
+	provider := GithubProvider{Host: "github.com", Port: 80, ProjectPath: "massis/oalienista"}
 	actual, err := provider.FetchLastRelease(m)
 	m.AssertCalled(t, "Do", mock.Anything)
 	assert.Nil(t, err, err)
 	assert.Equal(t, "v0.1.2", actual.Name)
 }
 
-func TestGitlabCacheRelease(t *testing.T) {
+func TestGithubCacheRelease(t *testing.T) {
 	release := &Release{
 		Name:        "v0.1.0-dev",
 		Description: "Development version.",
@@ -74,7 +74,7 @@ func TestGitlabCacheRelease(t *testing.T) {
 			{Name: "f3", URL: "u3"},
 		},
 	}
-	provider := GitlabProvider{}
+	provider := GithubProvider{}
 
 	err := provider.CacheRelease(*release)
 	assert.Nil(t, err, err)
@@ -94,7 +94,7 @@ func TestGitlabCacheRelease(t *testing.T) {
 	os.Remove(file)
 }
 
-func TestGitlabRestoreCacheRelease(t *testing.T) {
+func TestGithubRestoreCacheRelease(t *testing.T) {
 	release := &Release{
 		Name:        "v0.1.0-dev",
 		Description: "Development version.",
@@ -108,7 +108,7 @@ func TestGitlabRestoreCacheRelease(t *testing.T) {
 			{Name: "f3", URL: "u3"},
 		},
 	}
-	provider := GitlabProvider{}
+	provider := GithubProvider{}
 
 	now := time.Now().UTC()
 	fname := fmt.Sprintf("release_%s.json", now.Format("2006-01-02"))
@@ -128,14 +128,14 @@ func TestGitlabRestoreCacheRelease(t *testing.T) {
 	os.Remove(path)
 }
 
-func TestGitlabReleaseCompareTo(t *testing.T) {
-	r1 := &GitlabRelease{Name: "v0.1.0"}
-	r2 := &GitlabRelease{Name: "v0.1.1"}
+func TestGithubReleaseCompareTo(t *testing.T) {
+	r1 := &GithubRelease{Name: "v0.1.0"}
+	r2 := &GithubRelease{Name: "v0.1.1"}
 
 	assert.Equal(t, r1.CompareTo(r2), -1)
 }
 
-func TestGitlabFetchReleasesEmpty(t *testing.T) {
+func TestFetchGithubReleasesEmpty(t *testing.T) {
 	m := new(mockDecorator)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
@@ -143,9 +143,9 @@ func TestGitlabFetchReleasesEmpty(t *testing.T) {
 			Body:       io.NopCloser(bytes.NewReader([]byte(`[]`))),
 		}, nil)
 
-	provider := GitlabProvider{}
-	actual, err := fetchGitlabReleases(provider, m)
-	expected := []*GitlabRelease{}
+	provider := GithubProvider{}
+	actual, err := fetchGithubReleases(provider, m)
+	expected := []*GithubRelease{}
 
 	assert.Nil(t, err, err)
 	m.AssertCalled(t, "Do", mock.Anything)
@@ -158,7 +158,7 @@ func TestGitlabFetchReleasesEmpty(t *testing.T) {
 	}
 }
 
-func TestGitlabFetchReleasesError(t *testing.T) {
+func TestFetchGithubReleasesError(t *testing.T) {
 	m := new(mockDecorator)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
@@ -166,15 +166,15 @@ func TestGitlabFetchReleasesError(t *testing.T) {
 			Body:       nil,
 		}, errors.New("http test"))
 
-	provider := GitlabProvider{}
-	actual, err := fetchGitlabReleases(provider, m)
+	provider := GithubProvider{}
+	actual, err := fetchGithubReleases(provider, m)
 
 	m.AssertCalled(t, "Do", mock.Anything)
 	assert.Equal(t, err.Error(), "http test")
 	assert.Nil(t, actual)
 }
 
-func TestGitlabFetchReleasesBrokenJson(t *testing.T) {
+func TestFetchGithubReleasesBrokenJson(t *testing.T) {
 	m := new(mockDecorator)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
@@ -182,16 +182,16 @@ func TestGitlabFetchReleasesBrokenJson(t *testing.T) {
 			Body:       io.NopCloser(bytes.NewReader([]byte(`[{]`))),
 		}, nil)
 
-	provider := GitlabProvider{}
-	actual, err := fetchGitlabReleases(provider, m)
+	provider := GithubProvider{}
+	actual, err := fetchGithubReleases(provider, m)
 
 	m.AssertCalled(t, "Do", mock.Anything)
 	assert.NotNil(t, err)
 	assert.Equal(t, len(actual), 0)
 }
 
-func TestGitlabFetchReleases(t *testing.T) {
-	m := new(mockDecorator)
+func TestFetchGithubReleases(t *testing.T) {
+	m := new(mockGithubDecorator)
 	m.On("Do", mock.Anything).Return(
 		&http.Response{
 			StatusCode: http.StatusOK,
@@ -199,9 +199,9 @@ func TestGitlabFetchReleases(t *testing.T) {
 				bytes.NewReader([]byte(`[{"tag_name":"v0.1.0"},{"tag_name":"v0.1.1"},{"tag_name":"v0.1.2"}]`))),
 		}, nil)
 
-	provider := GitlabProvider{}
-	actual, err := fetchGitlabReleases(provider, m)
-	expected := []*GitlabRelease{
+	provider := GithubProvider{}
+	actual, err := fetchGithubReleases(provider, m)
+	expected := []*GithubRelease{
 		{Name: "v0.1.0"},
 		{Name: "v0.1.1"},
 		{Name: "v0.1.2"},
@@ -218,32 +218,32 @@ func TestGitlabFetchReleases(t *testing.T) {
 	}
 }
 
-func TestBuildGitlabServiceUrl(t *testing.T) {
-	p := GitlabProvider{"www.domain.com.br", 80, false, "aureliano/caravela", time.Second * 30}
-	expected := "http://www.domain.com.br:80/api/v4/projects/aureliano%2Fcaravela/releases"
-	actual := buildGitlabServiceURL(p)
+func TestBuildGithubServiceUrl(t *testing.T) {
+	p := GithubProvider{"www.domain.com.br", 80, false, "aureliano/caravela", time.Second * 30}
+	expected := "http://www.domain.com.br:80/repos/aureliano/caravela/releases"
+	actual := buildGithubServiceURL(p)
 
 	assert.Equal(t, expected, actual)
 }
 
-func TestBuildGitlabServiceUrlSsl(t *testing.T) {
-	p := GitlabProvider{"www.domain.com.br", 80, true, "aureliano/caravela", time.Second * 30}
-	expected := "https://www.domain.com.br:80/api/v4/projects/aureliano%2Fcaravela/releases"
-	actual := buildGitlabServiceURL(p)
+func TestBuildGithubServiceUrlSsl(t *testing.T) {
+	p := GithubProvider{"www.domain.com.br", 80, true, "aureliano/caravela", time.Second * 30}
+	expected := "https://www.domain.com.br:80/repos/aureliano/caravela/releases"
+	actual := buildGithubServiceURL(p)
 
 	assert.Equal(t, expected, actual)
 }
 
-func TestConvertGitlabReleases(t *testing.T) {
-	g1 := &GitlabRelease{
+func TestConvertGithubReleases(t *testing.T) {
+	g1 := &GithubRelease{
 		Name:        "v0.1.0",
-		Description: "Unit test.",
-		ReleaseAt:   time.Date(2023, 3, 9, 14, 11, 18, 0, time.UTC),
+		Body:        "Unit test.",
+		PublishedAt: time.Date(2023, 3, 9, 14, 11, 18, 0, time.UTC),
 	}
 
-	g1.Assets.Links = []struct {
+	g1.Assets = []struct {
 		Name string "json:\"name\""
-		URL  string "json:\"url\""
+		URL  string "json:\"browser_download_url\""
 	}{
 		{Name: "14-bis_Linux_x86_64.tar.gz", URL: "http://file-linux.tar.gz"},
 		{Name: "14-bis_Windows_x86_64.zip", URL: "http://file-windows.zip"},
@@ -251,15 +251,15 @@ func TestConvertGitlabReleases(t *testing.T) {
 		{Name: "checksums.txt", URL: "http://checksums.txt"},
 	}
 
-	g2 := &GitlabRelease{
+	g2 := &GithubRelease{
 		Name:        "v0.1.1",
-		Description: "Bug fix.",
-		ReleaseAt:   time.Date(2023, 3, 9, 14, 30, 21, 0, time.UTC),
+		Body:        "Bug fix.",
+		PublishedAt: time.Date(2023, 3, 9, 14, 30, 21, 0, time.UTC),
 	}
 
-	g2.Assets.Links = []struct {
+	g2.Assets = []struct {
 		Name string "json:\"name\""
-		URL  string "json:\"url\""
+		URL  string "json:\"browser_download_url\""
 	}{
 		{Name: "qtbis_Linux_x86_64.tar.gz", URL: "http://file-lnx.tar.gz"},
 		{Name: "qtbis_Windows_x86_64.zip", URL: "http://file-wdws.zip"},
@@ -267,16 +267,16 @@ func TestConvertGitlabReleases(t *testing.T) {
 		{Name: "checksums.txt", URL: "http://checksums.txt"},
 	}
 
-	sources := []*GitlabRelease{g1, g2}
-	target := convertGitlabReleases(sources)
+	sources := []*GithubRelease{g1, g2}
+	target := convertGithubReleases(sources)
 
 	for i, source := range sources {
 		release := target[i]
 		assert.Equal(t, source.Name, release.Name)
-		assert.Equal(t, source.Description, release.Description)
-		assert.Equal(t, source.ReleaseAt, release.ReleasedAt)
+		assert.Equal(t, source.Body, release.Description)
+		assert.Equal(t, source.PublishedAt, release.ReleasedAt)
 
-		for i, expected := range source.Assets.Links {
+		for i, expected := range source.Assets {
 			actual := release.Assets[i]
 			assert.Equal(t, expected.Name, actual.Name)
 			assert.Equal(t, expected.URL, actual.URL)
@@ -284,16 +284,16 @@ func TestConvertGitlabReleases(t *testing.T) {
 	}
 }
 
-func TestConvertGitlabToBase(t *testing.T) {
-	g := &GitlabRelease{
+func TestConvertGithubToBase(t *testing.T) {
+	g := &GithubRelease{
 		Name:        "v0.1.0",
-		Description: "Unit test.",
-		ReleaseAt:   time.Date(2023, 3, 9, 14, 11, 18, 0, time.UTC),
+		Body:        "Unit test.",
+		PublishedAt: time.Date(2023, 3, 9, 14, 11, 18, 0, time.UTC),
 	}
 
-	g.Assets.Links = []struct {
+	g.Assets = []struct {
 		Name string "json:\"name\""
-		URL  string "json:\"url\""
+		URL  string "json:\"browser_download_url\""
 	}{
 		{Name: "14-bis_Linux_x86_64.tar.gz", URL: "http://file-linux.tar.gz"},
 		{Name: "14-bis_Windows_x86_64.zip", URL: "http://file-windows.zip"},
@@ -301,81 +301,80 @@ func TestConvertGitlabToBase(t *testing.T) {
 		{Name: "checksums.txt", URL: "http://checksums.txt"},
 	}
 
-	r := convertGitlabToBase(g)
+	r := convertGithubToBase(g)
 	assert.Equal(t, r.Name, g.Name)
-	assert.Equal(t, r.Description, g.Description)
-	assert.Equal(t, r.ReleasedAt, g.ReleaseAt)
+	assert.Equal(t, r.Description, g.Body)
+	assert.Equal(t, r.ReleasedAt, g.PublishedAt)
 
-	for i, expected := range g.Assets.Links {
+	for i, expected := range g.Assets {
 		actual := r.Assets[i]
 		assert.Equal(t, expected.Name, actual.Name)
 		assert.Equal(t, expected.URL, actual.URL)
 	}
 }
 
-func TestValidateGitlabProviderInvalidHost(t *testing.T) {
-	p := GitlabProvider{Host: "", Port: 80, ProjectPath: "massis/oalienista"}
+func TestValidateGithubProviderInvalidHost(t *testing.T) {
+	p := GithubProvider{Host: "", Port: 80, ProjectPath: "massis/oalienista"}
 	expected := "host is required"
-	actual := validateGitlabProvider(p).Error()
+	actual := validateGithubProvider(p).Error()
 
 	assert.Equal(t, expected, actual)
 }
 
-func TestValidateGitlabProviderInvalidPort(t *testing.T) {
-	p := GitlabProvider{Host: "gitlab.com", Port: 0, ProjectPath: "massis/oalienista"}
+func TestValidateGithubProviderInvalidPort(t *testing.T) {
+	p := GithubProvider{Host: "Github.com", Port: 0, ProjectPath: "massis/oalienista"}
 	expected := "port must be > 0"
-	actual := validateGitlabProvider(p).Error()
+	actual := validateGithubProvider(p).Error()
 
 	assert.Equal(t, expected, actual)
 }
 
-func TestValidateGitlabProviderInvalid(t *testing.T) {
-	p := GitlabProvider{Host: "gitlab.com", Port: 80, ProjectPath: ""}
+func TestValidateGithubProviderInvalid(t *testing.T) {
+	p := GithubProvider{Host: "Github.com", Port: 80, ProjectPath: ""}
 	expected := "project path is required"
-	actual := validateGitlabProvider(p).Error()
+	actual := validateGithubProvider(p).Error()
 
 	assert.Equal(t, expected, actual)
 }
 
-func TestValidateGitlabProvider(t *testing.T) {
-	p := GitlabProvider{Host: "gitlab.com", Port: 80, ProjectPath: "massis/oalienista"}
-	assert.Nil(t, validateGitlabProvider(p))
+func TestValidateGithubProvider(t *testing.T) {
+	p := GithubProvider{Host: "Github.com", Port: 80, ProjectPath: "massis/oalienista"}
+	assert.Nil(t, validateGithubProvider(p))
 }
-
-func TestInitGitlabProviderHttp(t *testing.T) {
-	p := GitlabProvider{Port: 0, Ssl: false}
-	initGitlabProvider(&p)
+func TestInitGithubProviderHttp(t *testing.T) {
+	p := GithubProvider{Port: 0, Ssl: false}
+	initGithubProvider(&p)
 
 	assert.Equal(t, uint(80), p.Port)
 	assert.False(t, p.Ssl)
 
 	p.Ssl = true
-	initGitlabProvider(&p)
+	initGithubProvider(&p)
 	assert.Equal(t, uint(80), p.Port)
 	assert.False(t, p.Ssl)
 }
 
-func TestInitGitlabProviderHttps(t *testing.T) {
-	p := GitlabProvider{Port: 0, Ssl: true}
-	initGitlabProvider(&p)
+func TestInitGithubProviderHttps(t *testing.T) {
+	p := GithubProvider{Port: 0, Ssl: true}
+	initGithubProvider(&p)
 
 	assert.Equal(t, uint(443), p.Port)
 	assert.True(t, p.Ssl)
 
 	p.Ssl = false
-	initGitlabProvider(&p)
+	initGithubProvider(&p)
 	assert.Equal(t, uint(443), p.Port)
 	assert.True(t, p.Ssl)
 }
 
-func TestInitGitlabProviderTimeout(t *testing.T) {
-	p := GitlabProvider{Port: 8443, Ssl: true, Timeout: 0}
-	initGitlabProvider(&p)
+func TestInitGithubProviderTimeout(t *testing.T) {
+	p := GithubProvider{Port: 8443, Ssl: true, Timeout: 0}
+	initGithubProvider(&p)
 
 	assert.Equal(t, time.Second*30, p.Timeout)
 
 	p.Timeout = time.Second * 57
-	initGitlabProvider(&p)
+	initGithubProvider(&p)
 
 	assert.Equal(t, time.Second*57, p.Timeout)
 }
