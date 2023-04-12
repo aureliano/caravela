@@ -37,7 +37,6 @@ Update updates running program to the last available release.
 It returns the release used to update this program or raises an error if it's already the last version.
 
 	release, err := caravela.Update(caravela.Conf{
-		ProcessName: "bruzundangas",
 		Version:     "0.1.0",
 		Provider: provider.GitlabProvider{
 			Host:        "gitlab.com",
@@ -75,7 +74,6 @@ It returns the release used to update this program or raises an error if it's al
 
 		if shouldUpdate {
 			release, err := caravela.Update(caravela.Conf{
-				ProcessName: "bruzundangas",
 				Version:     "0.1.0",
 				Provider: provider.GitlabProvider{
 					Host:        "gitlab.com",

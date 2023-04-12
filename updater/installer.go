@@ -1,7 +1,6 @@
 package updater
 
 import (
-	"fmt"
 	"io"
 	"io/fs"
 	"os"
@@ -9,14 +8,7 @@ import (
 	"strings"
 )
 
-var _mpOsExecutable = os.Executable
-
-func install(srcDir string) error {
-	dir, err := homeDir()
-	if err != nil {
-		return err
-	}
-
+func install(srcDir, destDir string) error {
 	files, err := os.ReadDir(srcDir)
 	if err != nil {
 		return err
@@ -30,7 +22,7 @@ func install(srcDir string) error {
 		}
 
 		src := filepath.Join(srcDir, file.Name())
-		dest := filepath.Join(dir, file.Name())
+		dest := filepath.Join(destDir, file.Name())
 
 		err = installFile(dest, src)
 		if err != nil {
@@ -39,32 +31,6 @@ func install(srcDir string) error {
 	}
 
 	return nil
-}
-
-func homeDir() (string, error) {
-	ex, err := _mpOsExecutable()
-
-	if err != nil {
-		return "", fmt.Errorf("error getting running process: %w", err)
-	}
-
-	fi, err := os.Lstat(ex)
-	if err != nil {
-		return "", fmt.Errorf("error getting information from process: %w", err)
-	}
-
-	if fi.Mode()&os.ModeSymlink == os.ModeSymlink {
-		var path string
-		path, err = filepath.EvalSymlinks(ex)
-
-		if err != nil {
-			return "", err
-		}
-
-		return filepath.Dir(path), nil
-	}
-
-	return filepath.Dir(ex), nil
 }
 
 func installFile(dest, src string) error {

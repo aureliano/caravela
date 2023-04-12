@@ -7,6 +7,7 @@ import (
 	pvdr "github.com/aureliano/caravela/provider"
 )
 
+var mpProcessFilePath = processFilePath
 var mpDownloadTo = downloadTo
 var mpDecompress = decompress
 var mpChecksum = checksum
@@ -19,7 +20,6 @@ var mpInstall = install
 func UpdateRelease(
 	client pvdr.HTTPClientPlugin,
 	provider pvdr.UpdaterProvider,
-	pname,
 	currver string,
 	ignoreCache bool,
 ) (*pvdr.Release, error) {
@@ -28,7 +28,12 @@ func UpdateRelease(
 		return nil, err
 	}
 
-	dir := filepath.Join(os.TempDir(), pname)
+	procFile, err := mpProcessFilePath()
+	if err != nil {
+		return nil, err
+	}
+
+	dir := filepath.Join(os.TempDir(), filepath.Base(procFile))
 	_ = os.MkdirAll(dir, os.ModePerm)
 
 	bin, checksums, err := mpDownloadTo(client, rel, dir)
@@ -46,7 +51,7 @@ func UpdateRelease(
 		return nil, err
 	}
 
-	err = mpInstall(dir)
+	err = mpInstall(dir, "/tmp/test")
 	if err != nil {
 		return nil, err
 	}

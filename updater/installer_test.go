@@ -1,12 +1,10 @@
 package updater
 
 import (
-	"fmt"
 	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -47,12 +45,13 @@ func TestInstall(t *testing.T) {
 	}
 	file.Close()
 
-	target, err := homeDir()
+	exec, err := processFilePath()
 	if err != nil {
 		t.Fatal(err)
 	}
+	target := filepath.Dir(exec)
 
-	err = install(idir)
+	err = install(idir, target)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,47 +93,6 @@ func TestInstall(t *testing.T) {
 	assert.NotNil(t, err, err)
 
 	os.RemoveAll(idir)
-}
-
-func TestHomeDirOsExecutableFail(t *testing.T) {
-	_mpOsExecutable = func() (string, error) { return "", fmt.Errorf("some error") }
-	_, err := homeDir()
-
-	actual := err.Error()
-	expected := "error getting running process: some error"
-
-	assert.Equal(t, expected, actual)
-}
-
-func TestHomeDirUnknownPath(t *testing.T) {
-	_mpOsExecutable = func() (string, error) { return "/unknown/path", nil }
-	_, err := homeDir()
-
-	actual := err.Error()
-	expected := "error getting information from process: lstat /unknown/path: no such file or directory"
-
-	assert.Equal(t, expected, actual)
-}
-
-func TestHomeDir(t *testing.T) {
-	_mpOsExecutable = os.Executable
-	dir, err := homeDir()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	parts := strings.Split(dir, string(filepath.Separator))
-	if len(parts) < 3 {
-		t.Fatal("Expected at least 2 tokens.")
-	}
-
-	actual := parts[1]
-	expected := filepath.Base(os.TempDir())
-	assert.Equal(t, expected, actual)
-
-	actual = parts[2]
-	expected = "go-build"
-	assert.Contains(t, actual, expected)
 }
 
 func TestInstallFileNew(t *testing.T) {

@@ -36,17 +36,12 @@ func TestCheckForUpdates(t *testing.T) {
 	assert.Equal(t, "already on the edge", err.Error())
 }
 
-func TestUpdateProcessNameIsRequired(t *testing.T) {
-	_, err := Update(Conf{ProcessName: "", Version: "0.1.0"})
-	assert.Equal(t, "process name is required", err.Error())
-}
-
 func TestUpdateHTTPClientIsNil(t *testing.T) {
 	mpUpdate = func(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider,
-		pname, currver string, ignoreCache bool) (*pvdr.Release, error) {
+		currver string, ignoreCache bool) (*pvdr.Release, error) {
 		return nil, fmt.Errorf("")
 	}
 
-	_, err := Update(Conf{ProcessName: "oalienista", Version: "0.1.0"})
+	_, err := Update(Conf{Version: "0.1.0"})
 	assert.NotNil(t, err)
 }

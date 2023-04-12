@@ -57,7 +57,6 @@ if err != nil {
 
 	if shouldUpdate {
 		err = caravela.Update(caravela.Conf{
-			ProcessName: "caravela",
 			Version:     "0.1.0",
 			Provider: prov,
 		})
