@@ -34,7 +34,10 @@ func UpdateRelease(
 	}
 
 	dir := filepath.Join(os.TempDir(), filepath.Base(procFile))
-	_ = os.MkdirAll(dir, os.ModePerm)
+	err = os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		return nil, err
+	}
 
 	bin, checksums, err := mpDownloadTo(client, rel, dir)
 	if err != nil {
@@ -51,7 +54,7 @@ func UpdateRelease(
 		return nil, err
 	}
 
-	err = mpInstall(dir, "/tmp/test")
+	err = mpInstall(dir, filepath.Dir(procFile))
 	if err != nil {
 		return nil, err
 	}
