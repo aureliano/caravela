@@ -75,6 +75,9 @@ if err != nil {
 ## Examples
 Some examples are in the `example` module. There are some usage samples such as [check updates](./example/check_updates/github/main.go) and [update](./example/update/github/main.go).
 
+## Integration tests
+You can run integration tests from the test directory. The command `make integration-test` will execute some programs, that use the exported functions, and **check updates** and **update**.
+
 ## Contributing
 Please feel free to submit issues, fork the repository and send pull requests!
 
@@ -95,8 +98,11 @@ Security related bugs can either be reported in the issue tracker.
 5. Please run:
  - `make test`
  - `make code-lint`
+ - `make integration-test`
 
 The `make test` command will run tests inside your code. This will help you spot places where code might be faulty before committing.
+
+The `make integration-test` command will run integration tests to verify that the exported code that is called by clients works. 
 
 And the `make code-lint` command will check linting and styling over your code, keeping the project consistent formatting-wise.
 
