@@ -44,6 +44,11 @@ func TestCompareVersions(t *testing.T) {
 	}
 	testCases := []testCase{
 		{
+			name:     "r1 is greater than r2",
+			input:    []string{"v1.0", "v0.1.0"},
+			expected: 1,
+		},
+		{
 			name:     "r1 major is greater than r2 major",
 			input:    []string{"v1.0.0", "v0.1.0"},
 			expected: 1,

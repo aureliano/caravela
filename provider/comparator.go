@@ -12,6 +12,10 @@ func compareVersions(ver1, ver2 string) int {
 	match1 := releaseRegex.FindAllStringSubmatch(ver1, -1)
 	match2 := releaseRegex.FindAllStringSubmatch(ver2, -1)
 
+	if match1 == nil || match2 == nil {
+		return strings.Compare(ver1, ver2)
+	}
+
 	major := compareVersionParts(match1[0][1], match2[0][1])
 	if major != 0 {
 		return major
