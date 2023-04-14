@@ -50,7 +50,9 @@ func getChecksum(binPath, checksumsPath string) (string, error) {
 	var checksum string
 
 	for _, line := range lines {
-		if strings.Contains(line, filepath.Base(binPath)) {
+		binName := filepath.Base(binPath)
+
+		if strings.HasSuffix(line, fmt.Sprintf(" %s", binName)) {
 			columns := strings.Split(line, " ")
 			checksum = columns[0]
 			break
