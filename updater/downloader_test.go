@@ -243,9 +243,11 @@ func TestFetchReleaseFileUrl(t *testing.T) {
 		Name string `json:"name"`
 		URL  string `json:"url"`
 	}{
+		{Name: "14-bis_Linux_arm64.deb", URL: "http://file-linux.deb"},
 		{Name: "14-bis_Linux_x86_64.tar.gz", URL: "http://file-linux.tar.gz"},
 		{Name: "14-bis_Windows_x86_64.zip", URL: "http://file-windows.zip"},
 		{Name: "14-bis_Darwin_x86_64.tar.gz", URL: "http://file-darwin.tar.gz"},
+		{Name: "14-bis_Linux.rpm", URL: "http://file-linux.rpm"},
 		{Name: "checksums.txt", URL: "http://checksums.txt"},
 	}
 

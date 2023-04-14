@@ -79,7 +79,8 @@ func downloadFile(client provider.HTTPClientPlugin, sourceURL, dest string) erro
 func findReleaseFileURL(osys string, release *provider.Release) (string, string) {
 	for _, asset := range release.Assets {
 		name := strings.ToLower(asset.Name)
-		if strings.Contains(name, osys) {
+		acceptableType := strings.HasSuffix(name, ".zip") || strings.HasSuffix(name, ".tar.gz") || strings.HasSuffix(name, ".tgz")
+		if strings.Contains(name, osys) && acceptableType {
 			return asset.Name, asset.URL
 		}
 	}
