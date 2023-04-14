@@ -93,14 +93,14 @@ func TestUngzip(t *testing.T) {
 
 func TestWriteFileInvalidDest(t *testing.T) {
 	dest := filepath.Join("unknown", "path")
-	_, err := writeFile(dest, nil)
+	_, err := writeFile(dest, nil, 0666)
 	assert.NotNil(t, err)
 }
 
 func TestWriteFile(t *testing.T) {
 	in, _ := os.CreateTemp("", "test-write-file-*")
 	dest := filepath.Join(os.TempDir(), "test-dest-write-file")
-	path, err := writeFile(dest, in)
+	path, err := writeFile(dest, in, 0666)
 
 	assert.Nil(t, err, err)
 	assert.Equal(t, path, dest)

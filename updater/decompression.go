@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -45,7 +46,7 @@ func unzip(src string) (int, error) {
 		}
 
 		path := filepath.Join(dir, filepath.Clean(file.Name))
-		_, e = writeFile(path, in)
+		_, e = writeFile(path, in, file.Mode())
 		if e != nil {
 			return counter, e
 		}
@@ -96,8 +97,17 @@ func untar(dir string, in io.Reader) (int, error) {
 			}
 		case tar.TypeReg:
 			{
-				path := filepath.Join(dir, filepath.Clean(name))
-				_, err = writeFile(path, tarReader)
+				cname := filepath.Clean(name)
+				path := filepath.Join(dir, cname)
+				virtualDir := filepath.Dir(cname)
+				if virtualDir != "." {
+					err = os.MkdirAll(filepath.Join(dir, virtualDir), fs.ModePerm)
+					if err != nil {
+						return counter, err
+					}
+				}
+
+				_, err = writeFile(path, tarReader, fs.FileMode(header.Mode))
 				if err != nil {
 					return counter, err
 				}
@@ -112,8 +122,8 @@ func untar(dir string, in io.Reader) (int, error) {
 	return counter, nil
 }
 
-func writeFile(dest string, in io.Reader) (string, error) {
-	out, err := os.Create(dest)
+func writeFile(dest string, in io.Reader, perm fs.FileMode) (string, error) {
+	out, err := os.OpenFile(dest, os.O_RDWR|os.O_CREATE|os.O_TRUNC, perm)
 	if err != nil {
 		return "", err
 	}
