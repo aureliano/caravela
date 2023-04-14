@@ -171,3 +171,37 @@ func TestInstallFileReplace(t *testing.T) {
 	os.Remove(filepath.Join(os.TempDir(), "file.txt"))
 	os.Remove(dest)
 }
+
+func TestShouldIgoreFile(t *testing.T) {
+	type testCase struct {
+		name     string
+		input    string
+		expected bool
+	}
+	testCases := []testCase{
+		{
+			name:     "should ignore package file",
+			input:    "file.zip",
+			expected: true,
+		},
+		{
+			name:     "should ignore checksums file",
+			input:    "checksums.txt",
+			expected: true,
+		},
+		{
+			name:     "should not ignore file",
+			input:    "file.md",
+			expected: false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			actual := shouldIgoreFile(tc.input)
+			if actual != tc.expected {
+				t.Errorf("expected %t, got %t", tc.expected, actual)
+			}
+		})
+	}
+}

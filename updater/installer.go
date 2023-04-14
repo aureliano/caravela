@@ -9,28 +9,43 @@ import (
 )
 
 func install(srcDir, destDir string) error {
-	files, err := os.ReadDir(srcDir)
-	if err != nil {
-		return err
-	}
+	err := filepath.Walk(srcDir,
+		func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
 
-	for _, file := range files {
-		if strings.HasSuffix(file.Name(), "tar.gz") ||
-			strings.HasSuffix(file.Name(), "zip") ||
-			file.Name() == "checksums.txt" {
-			continue
-		}
+			if srcDir == path {
+				return nil
+			}
 
-		src := filepath.Join(srcDir, file.Name())
-		dest := filepath.Join(destDir, file.Name())
+			fname := filepath.Base(path)
+			cleanPath := filepath.Clean(path)
+			relPath := strings.ReplaceAll(cleanPath, srcDir, "")
 
-		err = installFile(dest, src)
-		if err != nil {
-			return err
-		}
-	}
+			if shouldIgoreFile(fname) {
+				return nil
+			}
 
-	return nil
+			if info.IsDir() {
+				err = os.Mkdir(filepath.Join(destDir, relPath), info.Mode())
+				if err != nil {
+					return err
+				}
+			} else {
+				src := filepath.Join(srcDir, relPath)
+				dest := filepath.Join(destDir, relPath)
+
+				err = installFile(dest, src)
+				if err != nil {
+					return err
+				}
+			}
+
+			return nil
+		})
+
+	return err
 }
 
 func installFile(dest, src string) error {
@@ -70,4 +85,29 @@ func installFile(dest, src string) error {
 	}
 
 	return nil
+}
+
+func shouldIgoreFile(fname string) bool {
+	types := []string{
+		".deb",
+		".zip.sbom",
+		".tar.gz.sbom",
+		".tar.gz",
+		".apk",
+		".tar.zst",
+		".zip",
+		".rpm",
+	}
+
+	if fname == "checksums.txt" {
+		return true
+	}
+
+	for _, tp := range types {
+		if strings.HasSuffix(fname, tp) {
+			return true
+		}
+	}
+
+	return false
 }
