@@ -4,6 +4,7 @@
 [![Coverage](https://coveralls.io/repos/github/aureliano/caravela/badge.svg?branch=main)](https://coveralls.io/github/aureliano/caravela?branch=main)
 [![caravela release (latest SemVer)](https://img.shields.io/github/v/release/aureliano/caravela?sort=semver)](https://github.com/aureliano/caravela/releases)
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/aureliano/caravela)](https://pkg.go.dev/github.com/aureliano/caravela)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Caravela is a Go library to support program update automation. Especially those built and released with [goreleaser](https://goreleaser.com).
 
