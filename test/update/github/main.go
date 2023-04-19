@@ -26,7 +26,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	expected := "v1.17.1"
+	expected := "v1.17.2"
 
 	if release.Name != expected {
 		log.Fatalf("Expected %s, but got %s instead.", expected, release.Name)

@@ -9,7 +9,7 @@ import (
 
 func main() {
 	release, err := caravela.CheckUpdates(caravela.Conf{
-		Version:     "0.1.0",
+		Version:     "0.1.0-alpha",
 		IgnoreCache: true,
 		Provider: provider.GithubProvider{
 			Host:        "api.github.com",

@@ -1,8 +1,6 @@
 package updater
 
 import (
-	"fmt"
-
 	pvdr "github.com/aureliano/caravela/provider"
 )
 
@@ -33,7 +31,7 @@ func FindUpdate(
 		return release, nil
 	}
 
-	return nil, fmt.Errorf("already on the edge")
+	return &pvdr.Release{}, nil
 }
 
 func findUpdateUseCache(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvider) (*pvdr.Release, error) {

@@ -1,6 +1,7 @@
 package updater
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -26,6 +27,8 @@ func UpdateRelease(
 	rel, err := FindUpdate(client, provider, currver, ignoreCache)
 	if err != nil {
 		return nil, err
+	} else if rel.Name == "" {
+		return nil, fmt.Errorf("already on the edge")
 	}
 
 	procFile, err := mpProcessFilePath()

@@ -54,6 +54,7 @@ It returns the release used to update this program or raises an error if it's al
 
 # Put it all together
 
+Let's put it all together chainning CheckUpdates and Update.
 
 	release, err := caravela.CheckUpdates(caravela.Conf{
 		Version: "0.1.0",
