@@ -52,7 +52,8 @@ It returns the release used to update this program or raises an error if it's al
 		fmt.Println("New version installed!")
 	}
 
-# Put it all together:
+# Put it all together
+
 
 	release, err := caravela.CheckUpdates(caravela.Conf{
 		Version: "0.1.0",
