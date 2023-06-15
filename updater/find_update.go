@@ -43,6 +43,10 @@ func findUpdateUseCache(client pvdr.HTTPClientPlugin, provider pvdr.UpdaterProvi
 			return nil, err
 		}
 
+		if release == nil {
+			release = &pvdr.Release{}
+		}
+
 		_ = provider.CacheRelease(*release)
 	}
 
